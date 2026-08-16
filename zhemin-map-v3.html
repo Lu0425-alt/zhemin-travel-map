@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>浙闽沿海网红攻略地图 v2 · 象山温州台州福州泉州厦门</title>
+<style>
+  :root{
+    --bg:#FFF7EF; --card:#FFFFFF; --ink:#4A3728; --sub:#9B8570;
+    --coral:#FF7A6E; --coral-d:#F2644F; --yellow:#FFC94D; --mint:#7FD8B0;
+    --sky:#8EC9F5; --sea:#62C6E8; --lilac:#B79CE8; --line:#F2DCC8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;line-height:1.65;}
+  .wrap{max-width:1080px;margin:0 auto;padding:18px 16px 60px;}
+  header.hero{text-align:center;padding:34px 16px 10px;}
+  .hero .kicker{display:inline-block;background:var(--yellow);color:#5A3E00;font-weight:700;font-size:13px;padding:4px 14px;border-radius:999px;letter-spacing:1px;}
+  h1{font-size:29px;margin:12px 0 6px;letter-spacing:1px;}
+  .hero p.sub{color:var(--sub);font-size:15px;}
+  .hero .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px;}
+  .chip{background:#fff;border:2px solid var(--line);border-radius:999px;padding:5px 13px;font-size:13px;color:var(--ink);}
+  .chip b{color:var(--coral-d);}
+  section{margin-top:34px;}
+  h2.sec{font-size:21px;display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  h2.sec::after{content:"";flex:1;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--coral),var(--yellow),var(--mint));}
+  .mapbox{background:linear-gradient(180deg,#EAF9FF 0%,#D6F1FB 55%,#C6EAF7 100%);border-radius:22px;padding:14px;box-shadow:0 10px 30px rgba(244,138,90,.18);}
+  .mapbox svg{width:100%;height:auto;display:block;}
+  .stp{cursor:pointer;}
+  .stp:hover{filter:drop-shadow(0 2px 6px rgba(244,130,90,.6));}
+  .stp:hover .ring{fill:#FFD9CF;stroke:#FF7A6E;stroke-width:4;}
+  .stp.opt:hover .ring{fill:#EFE3FB;stroke:#9673D9;}
+  .stp .ring{fill:#fff;stroke:#FF9B87;stroke-width:3;}
+  .stp.main .ring{fill:#FFE3DB;}
+  .stp.opt .ring{fill:#F3E9FF;stroke:#C9B2F2;stroke-dasharray:5 4;}
+  .stp text.city{font-size:21px;font-weight:800;fill:#4A3728;}
+  .stp text.day{font-size:12px;font-weight:700;fill:#fff;}
+  .stp .daypill{fill:var(--coral);}
+  .stp.opt .daypill{fill:var(--lilac);}
+  .stp text.tag{font-size:12px;font-weight:600;fill:#9B8570;}
+  .route{fill:none;stroke:#FF9B87;stroke-width:5;stroke-linecap:round;stroke-dasharray:10 8;opacity:.85;}
+  .route.alt{stroke:#C9B2F2;stroke-width:3.5;stroke-dasharray:4 7;opacity:.8;}
+  .wave{fill:none;stroke:#9ADCF0;stroke-width:3.5;stroke-linecap:round;}
+  .sea-deco{opacity:.85;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:13px;color:var(--sub);align-items:center;}
+  .legend .dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:4px;vertical-align:-2px;}
+  .hint{font-size:13px;color:var(--sub);margin-top:8px;text-align:center;}
+  .days{display:flex;flex-direction:column;gap:16px;}
+  details.day{background:#fff;border:2px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(160,110,60,.07);scroll-margin-top:16px;}
+  details.day summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  details.day summary::-webkit-details-marker{display:none;}
+  details.day[open]{border-color:var(--coral);}
+  .daynum{flex:0 0 auto;width:58px;height:58px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:800;line-height:1.1;}
+  .daynum small{font-size:11px;font-weight:600;opacity:.9;}
+  .daynum big{font-size:20px;}
+  .d1{background:linear-gradient(135deg,#FFB25E,#FF8A5C);} .d2{background:linear-gradient(135deg,#FF8A9B,#FF6E7F);}
+  .d3{background:linear-gradient(135deg,#7FD8B0,#4DBE8D);} .d4{background:linear-gradient(135deg,#8EC9F5,#5AA9E6);}
+  .d5{background:linear-gradient(135deg,#B79CE8,#9673D9);} .d6{background:linear-gradient(135deg,#FFC94D,#F5A623);}
+  .d7{background:linear-gradient(135deg,#8BD3C7,#5AB8A8);} .d8{background:linear-gradient(135deg,#FF9E7A,#F26D4F);}
+  .daytitle{flex:1;min-width:200px;}
+  .daytitle h3{font-size:18px;}
+  .daytitle p{font-size:13px;color:var(--sub);}
+  .routeinfo{font-size:13px;color:var(--coral-d);font-weight:700;background:#FFF0EC;border-radius:999px;padding:5px 12px;}
+  .body{padding:4px 20px 20px;}
+  .drive{background:#FFF7DC;border:2px solid #F5DFA8;border-radius:12px;padding:9px 13px;font-size:13px;color:#8A6D00;font-weight:600;margin-bottom:14px;}
+  table.timeline{width:100%;border-collapse:collapse;font-size:13px;background:#fff;margin-bottom:4px;}
+  .timeline th{background:#FFF0EC;color:#B94A35;font-weight:700;padding:7px 10px;text-align:left;border:1px solid var(--line);}
+  .timeline td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;color:#5C4A38;}
+  .timeline td.t{white-space:nowrap;font-weight:800;color:var(--coral-d);width:96px;}
+  .timeline td.l{font-weight:700;width:30%;color:#4A3728;}
+  @media(max-width:480px){.timeline td.t{white-space:normal;width:72px;}}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+  .box{background:#FDF6EE;border:1.5px dashed var(--line);border-radius:14px;padding:12px 14px;}
+  .box h5{font-size:14px;margin-bottom:6px;}
+  .box ul{list-style:none;}
+  .box li{font-size:13px;color:#6B5744;padding:2px 0 2px 18px;position:relative;}
+  .box li::before{content:"•";position:absolute;left:2px;color:var(--coral);font-weight:800;}
+  .optbox{background:#F6F0FF;border:2px dashed #C9B2F2;border-radius:14px;padding:12px 14px;margin-top:14px;}
+  .optbox h5{font-size:14px;margin-bottom:6px;color:#7A55C4;}
+  .optbox ul{list-style:none;}
+  .optbox li{font-size:13px;color:#5E4A8A;padding:2px 0 2px 20px;position:relative;}
+  .optbox li::before{content:"✨";position:absolute;left:0;font-size:12px;}
+  .optbadge{background:#F3E9FF;color:#7A55C4;font-size:12px;font-weight:700;border-radius:999px;padding:4px 11px;border:1.5px dashed #C9B2F2;}
+  .warn{background:#FFF3F0;border:2px solid #FFD4CB;border-radius:12px;padding:10px 14px;font-size:13px;color:#B94A35;margin-top:12px;}
+  .warn b{color:#E05A3F;}
+  .crowd{background:#EFF8FF;border:2px solid #B8DFF7;border-radius:14px;padding:12px 14px;margin-top:14px;}
+  .crowd h5{font-size:14px;margin-bottom:6px;color:#1F6FB0;}
+  .crowd ul{list-style:none;}
+  .crowd li{font-size:13px;color:#2C5E86;padding:2px 0 2px 22px;position:relative;}
+  .crowd li::before{content:"⏰";position:absolute;left:0;font-size:12px;}
+  .crowd li.no::before{content:"📋";}
+  .crowd li.hot::before{content:"🔥";}
+  .budget{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}
+  .bcard{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;}
+  .bcard h4{font-size:15px;margin-bottom:8px;color:var(--coral-d);}
+  .bcard p{font-size:13px;color:#6B5744;}
+  .tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+  .tcard{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;}
+  .tcard h4{font-size:15px;margin-bottom:8px;}
+  .tcard ul{list-style:none;}
+  .tcard li{font-size:13px;color:#6B5744;padding:2px 0 2px 18px;position:relative;}
+  .tcard li::before{content:"✓";position:absolute;left:0;color:var(--mint);font-weight:800;}
+  .lovelist{background:#FFF0F3;border:2px dashed #FFB3C0;border-radius:16px;padding:16px 20px;}
+  .lovelist ol{padding-left:22px;columns:2;column-gap:30px;}
+  @media(max-width:640px){.lovelist ol{columns:1;}}
+  .lovelist li{font-size:13.5px;color:#8A4450;padding:3px 0;}
+  footer{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  .flash{animation:flash 1.6s ease;}
+  @keyframes flash{0%,60%{box-shadow:0 0 0 6px rgba(255,122,110,.55);}100%{box-shadow:0 0 0 0 rgba(255,122,110,0);}}
+  .w1{animation:sway 5s ease-in-out infinite;} .w2{animation:sway 6s ease-in-out infinite reverse;}
+  @keyframes sway{0%,100%{transform:translateX(0);}50%{transform:translateX(10px);}}
+  @media(prefers-reduced-motion:reduce){.w1,.w2{animation:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="kicker">🚗 情侣自驾 · 网红打卡 · v3 人流提醒版</span>
+    <h1>浙闽沿海网红攻略地图（新版）</h1>
+    <p class="sub">2026.8.23 出发 · 6站7天 · 宁波 → 厦门 · 全程约1,100km（不含返程）· 可选第8天厦门深度游</p>
+    <div class="chips">
+      <span class="chip">🧡 2人 · 情侣</span>
+      <span class="chip">📍 起点 宁波江北慈城</span>
+      <span class="chip">⛰️ 不爬山 不赶路</span>
+      <span class="chip">📸 出片率优先</span>
+      <span class="chip">💡 大部分景点免费</span>
+    </div>
+  </header>
+
+  <!-- ============ 地图 ============ -->
+  <section>
+    <h2 class="sec">🗺️ 路线地图 <small style="font-size:13px;color:var(--sub);font-weight:400;">（点击站点跳转当日详情）</small></h2>
+    <div class="mapbox">
+      <svg viewBox="0 0 900 1500" role="img" aria-label="浙闽沿海新版路线地图：宁波经象山、温州、台州临海、福州、泉州到厦门，可选石塘">
+        <defs>
+          <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8EDCF3"/><stop offset="1" stop-color="#5DBFE4"/>
+          </linearGradient>
+          <linearGradient id="landG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FFF3DC"/><stop offset="1" stop-color="#FFE7C2"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,0 L640,0 C660,120 700,260 700,400 C700,560 640,660 660,820 C680,980 620,1100 660,1280 C680,1400 660,1500 660,1500 L0,1500 Z" fill="url(#landG)"/>
+        <path d="M640,0 C660,120 700,260 700,400 C700,560 640,660 660,820 C680,980 620,1100 660,1280 C680,1400 660,1500 660,1500 L900,1500 L900,0 Z" fill="url(#seaG)"/>
+        <g class="sea-deco">
+          <path class="wave w1" d="M700,120 q20,-12 40,0 q20,12 40,0"/>
+          <path class="wave w2" d="M710,300 q20,-12 40,0 q20,12 40,0"/>
+          <path class="wave w1" d="M690,560 q20,-12 40,0 q20,12 40,0"/>
+          <path class="wave w2" d="M700,760 q20,-12 40,0 q20,12 40,0"/>
+          <path class="wave w1" d="M690,980 q20,-12 40,0 q20,12 40,0"/>
+          <path class="wave w2" d="M700,1200 q20,-12 40,0 q20,12 40,0"/>
+          <circle cx="800" cy="100" r="34" fill="#FFD66E" opacity=".9"/>
+          <g opacity=".55" fill="#fff">
+            <circle cx="770" cy="330" r="24"/><circle cx="800" cy="322" r="18"/><circle cx="786" cy="344" r="16"/>
+            <circle cx="760" cy="700" r="22"/><circle cx="790" cy="692" r="17"/>
+            <circle cx="805" cy="1080" r="24"/><circle cx="836" cy="1072" r="18"/>
+          </g>
+          <g transform="translate(730,540)">
+            <path d="M-12,26 L-12,-8 L0,-16 L12,-8 L12,26 Z" fill="#fff"/>
+            <rect x="-16" y="24" width="32" height="7" rx="3" fill="#fff"/>
+          </g>
+          <path d="M760,1320 l0,-22 m0,-6 l0,-10" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="760" cy="1274" r="8" fill="#FFD66E"/>
+        </g>
+        <!-- 主路线 -->
+        <path class="route" d="M470,80 C540,110 600,150 640,220"/>
+        <path class="route" d="M640,220 C610,280 500,310 400,340"/>
+        <path class="route" d="M400,340 C405,400 415,460 430,520"/>
+        <path class="route" d="M430,520 C430,600 432,680 430,760"/>
+        <path class="route" d="M430,760 C420,860 410,940 400,1040"/>
+        <path class="route" d="M400,1040 C410,1120 425,1200 440,1280"/>
+        <!-- 可选支线：临海→石塘 -->
+        <path class="route alt" d="M400,340 C470,360 540,380 610,430"/>
+        <circle cx="470" cy="80" r="16" fill="#fff" stroke="#FF7A6E" stroke-width="4"/>
+        <text x="470" y="87" text-anchor="middle" font-size="18">🚗</text>
+        <!-- ===== 站点 ===== -->
+        <g class="stp main" data-day="0" transform="translate(470,80)">
+          <circle class="ring" r="29"/><rect class="daypill" x="-14" y="-44" width="28" height="16" rx="8"/>
+          <text class="day" y="-32" text-anchor="middle">出发</text>
+          <text y="6" text-anchor="middle" font-size="23">🏮</text>
+          <text class="city" y="50" text-anchor="middle">宁波</text>
+          <text class="tag" y="68" text-anchor="middle">慈城出发</text>
+        </g>
+        <g class="stp main" data-day="1" transform="translate(640,220)">
+          <circle class="ring" r="30"/><rect class="daypill" x="-15" y="-46" width="30" height="17" rx="8.5"/>
+          <text class="day" y="-33" text-anchor="middle">D1</text>
+          <text y="7" text-anchor="middle" font-size="24">🦪</text>
+          <text class="city" y="52" text-anchor="middle">象山</text>
+          <text class="tag" y="70" text-anchor="middle">渔港日落</text>
+        </g>
+        <g class="stp main" data-day="3" transform="translate(430,520)">
+          <circle class="ring" r="30"/><rect class="daypill" x="-15" y="-46" width="30" height="17" rx="8.5"/>
+          <text class="day" y="-33" text-anchor="middle">D3</text>
+          <text y="7" text-anchor="middle" font-size="24">🌉</text>
+          <text class="city" y="52" text-anchor="middle">温州</text>
+          <text class="tag" y="70" text-anchor="middle">江心屿夜色</text>
+        </g>
+        <g class="stp main" data-day="2" transform="translate(400,340)">
+          <circle class="ring" r="30"/><rect class="daypill" x="-15" y="-46" width="30" height="17" rx="8.5"/>
+          <text class="day" y="-33" text-anchor="middle">D2</text>
+          <text y="7" text-anchor="middle" font-size="24">🏮</text>
+          <text class="city" y="52" text-anchor="middle">台州临海</text>
+          <text class="tag" y="70" text-anchor="middle">糯叽叽古城</text>
+        </g>
+        <g class="stp opt" data-day="2" data-name="温岭石塘" transform="translate(610,430)">
+          <circle class="ring" r="24"/><rect class="daypill" x="-12" y="-38" width="24" height="15" rx="7.5"/>
+          <text class="day" y="-27" text-anchor="middle">可选</text>
+          <text y="6" text-anchor="middle" font-size="19">🌈</text>
+          <text class="city" y="44" text-anchor="middle" font-size="17">石塘</text>
+          <text class="tag" y="62" text-anchor="middle" font-size="11">五渔村</text>
+        </g>
+        <g class="stp main" data-day="5" transform="translate(430,760)">
+          <circle class="ring" r="30"/><rect class="daypill" x="-15" y="-46" width="30" height="17" rx="8.5"/>
+          <text class="day" y="-33" text-anchor="middle">D5</text>
+          <text y="7" text-anchor="middle" font-size="24">🏯</text>
+          <text class="city" y="52" text-anchor="middle">福州</text>
+          <text class="tag" y="70" text-anchor="middle">三坊七巷</text>
+        </g>
+        <g class="stp main" data-day="6" transform="translate(400,1040)">
+          <circle class="ring" r="30"/><rect class="daypill" x="-15" y="-46" width="30" height="17" rx="8.5"/>
+          <text class="day" y="-33" text-anchor="middle">D6</text>
+          <text y="7" text-anchor="middle" font-size="24">🌸</text>
+          <text class="city" y="52" text-anchor="middle">泉州</text>
+          <text class="tag" y="70" text-anchor="middle">世遗古城</text>
+        </g>
+        <g class="stp main" data-day="7" transform="translate(440,1280)">
+          <circle class="ring" r="32"/><rect class="daypill" x="-16" y="-49" width="32" height="18" rx="9"/>
+          <text class="day" y="-35" text-anchor="middle">D7</text>
+          <text y="7" text-anchor="middle" font-size="25">🌊</text>
+          <text class="city" y="55" text-anchor="middle">厦门</text>
+          <text class="tag" y="73" text-anchor="middle">环岛路日落</text>
+        </g>
+      </svg>
+      <div class="legend">
+        <span><span class="dot" style="background:#FFE3DB;border:2px solid #FF9B87;"></span>主线站点（点击看当日）</span>
+        <span><span class="dot" style="background:#F3E9FF;border:2px dashed #C9B2F2;"></span>可选加站</span>
+        <span>🚗 起点宁波</span><span>📍 象山→台州→温州 顺路南下</span><span>🌊 东海</span>
+      </div>
+      <p class="hint">💡 点击任意站点，自动跳到对应日的行程卡片</p>
+    </div>
+  </section>
+
+  <!-- ============ 每日行程 ============ -->
+  <section>
+    <h2 class="sec">🗓️ 每日行程</h2>
+    <p style="font-size:13px;color:var(--sub);margin:-6px 0 12px;">✨ 紫色小标签 = 当天含"可选加站"（已放在卡片末尾）</p>
+    <div class="days">
+
+      <details class="day" id="day-1" open>
+        <summary>
+          <span class="daynum d1"><small>Day 1</small><big>8.23</big></span>
+          <span class="daytitle"><h3>🦪 宁波 → 象山</h3><p>渔港古城 × 橘子海日落</p></span>
+          <span class="routeinfo">100km · 1.5h · 甬莞高速G1523</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：9:00 宁波江北慈城出发 → 10:30 象山县（约100km · 1.5h · G1523，过路费约45元）· 当晚宿石浦古城周边/松兰山</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">9:00-10:30</td><td class="l">🚗 宁波慈城 → 象山县</td><td>甬莞高速G1523南下；到酒店放行李</td></tr>
+              <tr><td class="t">10:30-16:00</td><td class="l">📍 象山县·松兰山滨海度假区（免费 4A）</td><td>12km超长滨海栈道、南沙滩踩水、礁石咖啡（ins枯木秋千）、亚帆中心蓝白建筑；退潮可赶海挖螺。傍晚看橘子海日落</td></tr>
+              <tr><td class="t">16:30-18:30</td><td class="l">📍 象山县·石浦镇·石浦渔港古城（16:30后免票，白天约60元）</td><td>600年活渔港古镇（中国四大渔港之一）：青石板古巷+百年渔家老宅；傍晚灯笼亮起，万家渔火映碧海</td></tr>
+              <tr><td class="t">19:00-20:00</td><td class="l">🎭 石浦古城·非遗鱼灯舞表演</td><td>别错过！看完牵手逛渔港夜市</td></tr>
+              <tr><td class="t">20:00-21:00</td><td class="l">🍚 石浦老街海鲜晚餐</td><td>第二碗面（象山30年老店，海鲜明档自选，人均30）或石浦海鲜排档：葱油梭子蟹、皮皮虾、红膏咸蟹</td></tr>
+            </tbody>
+          </table>
+          <div class="grid2">
+            <div class="box"><h5>🍜 象山必吃（附位置）</h5><ul>
+              <li>海鲜面 渔满仓海鲜面 60元（本地人私藏21年老店，鱼骨奶白汤底）</li>
+              <li>葱油梭子蟹 石浦海鲜排档 时价（8月东海第一口鲜）</li>
+              <li>鱼糍面 25元（石浦老城区·非遗，马鲛鱼捶打）</li>
+              <li>虾饼+米馒头 5-10元（石浦古城内小吃）</li>
+              <li>第二碗面 人均30元（30年老店）</li></ul></div>
+            <div class="box"><h5>🏨 住宿 · 必拍 · 隐藏</h5><ul>
+              <li>首选：石浦古城周边渔家民宿 200-400元（吃逛方便）；松兰山海边民宿 200-500元</li>
+              <li>📸 松兰山礁石咖啡剪影、石浦古城万家渔火夜景</li>
+              <li>✨ 隐藏：东门岛红白妈祖灯塔（第二天上午顺路）、饭桶山"宁波小阿勒泰"（海边草坪+白风车）</li></ul></div>
+          </div>
+          <div class="warn"><b>⚠️ 避坑：</b>石浦古城16:30后才免票，别白天花钱进去；赶海先查"象山海洋预报"退潮时间。</div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">松兰山暑期/节假日人多车多：车需停外围停车场再坐摆渡车；非假期可直接开进景区（路边免费停）</li>
+            <li>石浦古城白天票约50-60元，17:00后免费入园；夜景+鱼灯巡游约17:00-19:30，傍晚蓝调时刻人最多</li>
+            <li class="no">赶海先查"象山海洋预报"退潮时间；古城台阶多+青苔滑，穿防滑鞋</li>
+            <li>饭桶山/东门岛小众：建议上午9-11点去，人少光线通透</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-2" open>
+        <summary>
+          <span class="daynum d2"><small>Day 2</small><big>8.24</big></span>
+          <span class="daytitle"><h3>🏮 象山 → 台州临海</h3><p>东门岛晨光 × 糯叽叽古城夜</p></span>
+          <span class="routeinfo">约200km · 3h · 甬莞转台金</span>
+          <span class="optbadge">✨ 含可选加站</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：8:00 东门岛 → 10:30 出发 → 13:30 台州临海（约200km · 3h，甬莞高速转台金高速，顺路南下）· 当晚宿临海古城</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">8:00-10:00</td><td class="l">📍 象山县·东门岛（免费）</td><td>过铜瓦门大桥直达：红白妈祖灯塔网红机位、环海木栈道（一边悬崖一边蓝海）、千年观音寺；约2h</td></tr>
+              <tr><td class="t">10:30-13:30</td><td class="l">🚗 象山 → 台州临海</td><td>约200km，3h（甬莞高速转台金高速）；到临海古城放行李</td></tr>
+              <tr><td class="t">13:30-17:00</td><td class="l">📍 临海市古城·紫阳古街（免费）</td><td>千年石板古街从街头吃到巷尾：蛋清羊尾8、海苔饼5、乌饭麻糍、麦虾15、嵌糕10、梅花糕、酒酿圆子；看老师傅做杆秤、弹棉花</td></tr>
+              <tr><td class="t">17:00-18:30</td><td class="l">📍 临海市·东湖公园（免费）+ 台州府城墙</td><td>东湖"台州小西湖"：情侣划船超浪漫；城墙揽胜门→朝天门段路面平缓（登墙65元，或城墙下外观免费）</td></tr>
+              <tr><td class="t">18:30-20:00</td><td class="l">🌙 台州府城墙夜景（"江南长城"灯光秀）</td><td>不登墙，城墙下看灯光夜景超美</td></tr>
+              <tr><td class="t">20:00-21:00</td><td class="l">🍚 临海晚餐</td><td>麦虾、姜汁核桃蛋、食饼筒（台州版春卷），人均40-60</td></tr>
+            </tbody>
+          </table>
+          <div class="grid2">
+            <div class="box"><h5>🍜 临海必吃（附位置）</h5><ul>
+              <li>海苔饼 5元（紫阳古街现烤）· 蛋清羊尾 8元（紫阳古街）</li>
+              <li>嵌糕 10元（临海街头，手打年糕包红烧肉）</li>
+              <li>麦虾 15元（临海老店，比面条更筋道）</li>
+              <li>乌饭麻糍、梅花糕、酒酿圆子（古街小摊）</li></ul></div>
+            <div class="box"><h5>🏨 住宿</h5><ul>
+              <li>首选：临海古城·紫阳街附近古宅民宿 200-400元（出门就是古街）</li>
+              <li>📸 紫阳古街石板路+百年老店、东湖划船剪影、府城墙夜景</li>
+              <li>⚠️ 紫阳古街周末/节假日人挤人，工作日更舒服</li></ul></div>
+          </div>
+          <div class="optbox"><h5>✨ 可选加站：温岭市·石塘半岛（"中国版五渔村"· 临海→石塘约60km/1h）</h5><ul>
+            <li>七彩小箬村（免费）：柠檬黄/蜜桃粉/薄荷绿石屋层叠+五彩阶梯通向海边，下午3-5点夕阳映照时马卡龙色最浓（全程最佳出片点）</li>
+            <li>对戒观景台 + 8km滨海绿道（免费）：形似紧扣戒指的360°观景台，日落时整个半岛染成橘色——情侣必打卡</li>
+            <li>石塘渔家乐海鲜午餐：家烧黄鱼、醉花蚶、红烧水潺，人均80-120；姜汁索面15元（渔民生日最高礼遇）</li>
+            <li>海景民宿（石塘半岛）：静沁有墅（油画石头房+全景落地窗）、奢野一宅（悬崖360°海景）、奢野既来（百年石屋270°海景），500-1500元/晚</li>
+            <li>⚠️ 加站方案：本日上午先去石塘，傍晚回临海看城墙夜景；或直接住石塘一晚（海景天花板）；节假日自驾提前问民宿要通行证、小箬村台阶多穿舒适鞋</li></ul></div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">紫阳古街下午和周末人特别多：想不排队吃海苔饼建议早上8点前；主街入口挤，往里走50米人少老店多</li>
+            <li>台州府城墙光影秀：每周二至周日晚19:00/19:30、21:00/21:30各一场（兴善门段，约10分钟）；周一（非法定节假日）无演出，以官方为准</li>
+            <li class="no">城墙登墙65元/东湖免费；城墙+东湖+灯光秀联票约120元更划算</li>
+            <li class="hot">石塘小箬村节假日人超多：热门阶梯机位要拿号排队；村口停车约30元/天，日落时段车位紧张建议早到；村内路窄勿开入</li>
+            <li>小箬村最佳 15:00-18:00 或早8-11点；对戒观景台日落人多，提前占位</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-3" open>
+        <summary>
+          <span class="daynum d3"><small>Day 3</small><big>8.25</big></span>
+          <span class="daytitle"><h3>🌉 台州临海 → 温州</h3><p>古城慢时光 × 瓯江夜色</p></span>
+          <span class="routeinfo">143km · 2h · 甬台温高速</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：上午临海自由活动（晨逛紫阳街补拍）→ 11:30 出发 → 13:30 温州市鹿城区（约143km · 2h · 甬台温高速）· 当晚宿五马街/鹿城区</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">9:00-11:00</td><td class="l">📍 临海古城·紫阳古街（晨逛可选）</td><td>早上人少好拍：补吃海苔饼/蛋清羊尾，看店铺陆续开门的古城清晨</td></tr>
+              <tr><td class="t">11:30-13:30</td><td class="l">🚗 临海 → 温州市鹿城区</td><td>约143km，2h（甬台温高速）；到市区午餐</td></tr>
+              <tr><td class="t">14:30-16:30</td><td class="l">📍 鹿城区·江心屿（含往返船票30元/人）</td><td>江心屿码头乘船约5分钟上岛：东西双塔、江心寺、谢灵运遗迹，岛上古榕遮天，全程平路2h</td></tr>
+              <tr><td class="t">17:30-19:30</td><td class="l">📍 鹿城区·五马街 + 禅街（免费）</td><td>百年骑楼老街边走边吃：糯米饭、灯盏糕、鱼丸汤、永嘉麦饼；禅街国风灯笼</td></tr>
+              <tr><td class="t">20:00-21:30</td><td class="l">📍 鹿城区·南塘风貌街（免费）</td><td>沿河古建+灯笼倒影、白鹿洲公园，夜景散步消食</td></tr>
+            </tbody>
+          </table>
+          <div class="grid2">
+            <div class="box"><h5>🍜 温州必吃（附位置）</h5><ul>
+              <li>糯米饭 5-10元（三姐妹炊饭/府学巷，温州早餐C位）</li>
+              <li>鱼丸汤 10-18元（陈辉鱼圆，鮸鱼手工捶打）</li>
+              <li>灯盏糕 12元（扁头灯盏糕·五马街）</li>
+              <li>猪脏粉 15元（守英猪脏粉）· 江蟹生 时价（正亮海鲜）</li>
+              <li>永嘉麦饼 8元（五马街老摊）· 长人馄饨 · 矮人松糕</li></ul></div>
+            <div class="box"><h5>🏨 住宿 · 必拍 · 隐藏</h5><ul>
+              <li>首选：五马街/解放街附近 200-400元（老城区步行圈，停车方便）</li>
+              <li>📸 江心屿东西双塔倒影、五马街老骑楼、南塘夜景灯笼</li>
+              <li>✨ 隐藏：洞头猫耳朵（渡轮去洞头吃碗猫耳朵看海岛，时间充裕才去）</li></ul></div>
+          </div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li>江心屿周末人稍多：建议13:30-17:30错峰登岛；渡轮8:00-22:00每半小时一班（19:30停止售票）</li>
+            <li class="hot">五马街/南塘晚上6-9点是高峰，南塘夜景19:00后热闹；想逛得舒服可傍晚先到、错峰逛吃</li>
+            <li class="no">五马街"网红奶茶"别排队；糯米饭/鱼丸去老店（三姐妹炊饭/陈辉鱼圆）</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-4" open>
+        <summary>
+          <span class="daynum d4"><small>Day 4</small><big>8.26</big></span>
+          <span class="daytitle"><h3>🎋 温州深度游（楠溪江）</h3><p>世外桃源古村 × 瓯江夜色</p></span>
+          <span class="routeinfo">楠溪江50km · 1h（往返）</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：8:30 温州 → 9:30 楠溪江岩头镇（约50km · 1h）→ 15:00 返温州 · 当晚继续住温州市区</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">9:30-11:00</td><td class="l">📍 永嘉县·岩头镇·丽水古街 + 苍坡古村（均免费）</td><td>丽水古街：临水古长廊、红灯笼倒映水面；苍坡古村：千年宋代"文房四宝"布局，原生态田园风光</td></tr>
+              <tr><td class="t">11:00-12:00</td><td class="l">🛶 楠溪江竹筏漂流（30-50元/人）</td><td>岩头镇狮子岩附近码头；300里江水蜿蜒、两岸青山如画，全程约1h，非常轻松</td></tr>
+              <tr><td class="t">12:00-13:00</td><td class="l">🍚 楠溪江农家菜</td><td>香鱼、烤全羊（小份）、永嘉麦饼，人均60-80</td></tr>
+              <tr><td class="t">15:00-16:30</td><td class="l">📍 温州市区·朔门街 + 梧田老街（免费）</td><td>朔门街：千年古港遗址新晋网红打卡地；梧田老街：文艺小店+咖啡馆</td></tr>
+              <tr><td class="t">18:00-19:30</td><td class="l">📍 瓯江江滨路·瓯江夜景</td><td>瓯江两岸灯光秀，江滨路散步吹江风</td></tr>
+              <tr><td class="t">19:30-21:00</td><td class="l">🍚 温州海鲜大排档</td><td>江蟹、蝤蠓（青蟹）、小黄鱼、蛏子，人均80-120</td></tr>
+            </tbody>
+          </table>
+          <div class="warn"><b>⚠️ 提示：</b>楠溪江周末人多，工作日体验更好。</div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">7-8月暑期漂流人多：上午和周末排队，下午去更顺；狮子岩漂流约80元/人、一筏5人，拼船可能要等</li>
+            <li>丽水古街/苍坡村周末人多，工作日体验更好</li>
+            <li class="no">农家菜旺季中午满座，12点前到店更从容</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-5" open>
+        <summary>
+          <span class="daynum d5"><small>Day 5</small><big>8.27</big></span>
+          <span class="daytitle"><h3>🏯 温州 → 福州</h3><p>赶路日 × 三坊七巷闽味夜</p></span>
+          <span class="routeinfo">约350km · 4h · G15沈海高速</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：8:00 温州出发 → 12:00 福州市（约350km · 4h · G15沈海高速，过路费约150元，今天主要赶路）· 当晚宿三坊七巷/烟台山周边</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">12:00-13:00</td><td class="l">🍚 福州午餐</td><td>同利肉燕（三坊七巷15-25）、永和鱼丸、锅边糊、芋泥，人均30-50</td></tr>
+              <tr><td class="t">13:30-17:00</td><td class="l">📍 鼓楼区·三坊七巷（街区免费）</td><td>"中国城市里坊制度活化石"：南后街爱心树（和爱心鱼丸同框）、文儒坊/黄巷/衣锦坊马鞍墙古厝、冰心&林觉民故居、小黄楼、水榭戏台（个别故居15元）</td></tr>
+              <tr><td class="t">17:00-18:30</td><td class="l">📍 仓山区·烟台山历史风貌区（免费）</td><td>"福州小欧洲"：百年万国洋楼、石厝教堂、万春巷最美转角、露台咖啡店俯瞰闽江；日落光影16:00-18:30</td></tr>
+              <tr><td class="t">19:30-21:00</td><td class="l">📍 台江区·中洲岛 + 上下杭（免费）</td><td>中洲岛：闽江欧式城堡夜景如童话；上下杭：三捷河+月亮桥红灯笼（比三坊七巷安静）；小吃：没牙伯花生汤、耳聋伯元宵</td></tr>
+            </tbody>
+          </table>
+          <div class="grid2">
+            <div class="box"><h5>🍜 福州必吃（附位置）</h5><ul>
+              <li>爱心鱼丸 18元（通隆鱼丸·南后街爱心树下，金奖手工鳗鱼丸）</li>
+              <li>肉燕 15-25元（同利肉燕老铺·三坊七巷，百年非遗）</li>
+              <li>捞化 15元（依土捞化·庆城路）· 锅边糊+海蛎饼 8元（彬德桥时粿铺，早7点）</li>
+              <li>花生汤+芋泥 5元（没牙伯·老药洲街，下午3点就卖空）</li>
+              <li>佛跳墙 100元（老福洲徐记·吉庇巷，可选大餐）</li></ul></div>
+            <div class="box"><h5>🏨 住宿 · 必拍</h5><ul>
+              <li>首选：三坊七巷周边 200-500元（停车场15元/天）或仓山区烟台山/闽江沿岸（方便看日落夜景）</li>
+              <li>📸 三坊七巷马鞍墙古厝、爱心榕树（早8点前没人）、烟台山万春巷转角、中洲岛夜景、上下杭月亮桥</li>
+              <li>⚠️ 三坊七巷主街商业化严重，钻进小巷才是精华；景区门口鱼丸多为机器制品，去老字号</li></ul></div>
+          </div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">三坊七巷南后街11:20-14:30客流峰值：这个时段只就餐、别逛主街；早7-9点或傍晚去最舒服</li>
+            <li class="no">爱心榕树早8点前没人；水榭戏台下午4点后免费+光线好（免费院落）</li>
+            <li>烟台山避开10-12点旅行团；日落16:00-18:30、夜景19:00后</li>
+            <li class="no">三坊七巷停车场15元/天，周末车位紧张</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-6" open>
+        <summary>
+          <span class="daynum d6"><small>Day 6</small><big>8.28</big></span>
+          <span class="daytitle"><h3>🌸 福州 → 泉州</h3><p>空中森林步道 × 世遗古城</p></span>
+          <span class="routeinfo">200km · 2.5h · G15沈海高速</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：8:30 福道 → 13:00 出发 → 15:30 泉州市鲤城区（约200km · 2.5h · G15，过路费约90元）· 当晚宿西街/钟楼附近</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">8:30-10:30</td><td class="l">📍 福州市·福道（免费）</td><td>全国最长空中森林步道（19km），精华段：3号口梅峰山地公园→5号口金牛山体育公园，约2.5km、平路多爬升少、1-2h；悬空栈道穿梭树冠，高处观景台合影背景是整座城市</td></tr>
+              <tr><td class="t">11:00-12:30</td><td class="l">🍚 福州最后一餐</td><td>捞化（福州米粉汤）、荔枝肉、醉排骨，人均40-60</td></tr>
+              <tr><td class="t">13:00-15:30</td><td class="l">🚗 福州 → 泉州市鲤城区</td><td>约200km，2.5h；到西街附近放行李</td></tr>
+              <tr><td class="t">15:30-18:00</td><td class="l">📍 鲤城区·西街 + 开元寺（均免费）</td><td>开元寺（6:30-17:40）：东西双塔（中国现存最高宋代石塔）、飞天乐伎、桑莲法界，15:00有免费讲解；西街1300年石板路：面线糊、土笋冻、醋肉、石花膏；钟楼</td></tr>
+              <tr><td class="t">18:00-19:00</td><td class="l">🌇 西街天台看双塔日落</td><td>"有鲤"/"莓超疯"天台咖啡馆；或象峰巷芥子书屋二楼露台直面双塔</td></tr>
+              <tr><td class="t">19:30-21:00</td><td class="l">📍 鲤城区·中山路骑楼夜景（免费）</td><td>南洋风情骑楼灯光，逛吃逛吃</td></tr>
+            </tbody>
+          </table>
+          <div class="grid2">
+            <div class="box"><h5>🍜 泉州必吃（附位置）</h5><ul>
+              <li>面线糊 12元（婷婷面线糊/水门国仔，配油条+醋肉+大肠）</li>
+              <li>牛肉羹 20元（东兴牛肉羹）· 姜母鸭 60元（斯丹·涂门街）</li>
+              <li>肉粽 15元（侯阿婆）· 土笋冻 10元 · 四果汤 8元（秉正堂）</li></ul></div>
+            <div class="box"><h5>🏨 住宿 · 避坑</h5><ul>
+              <li>首选：西街/钟楼附近古厝民宿 300-800元（有院落天台，天台可望双塔）</li>
+              <li>性价比：西湖公园/浦西万达附近更便宜</li>
+              <li>⚠️ 西街机动车限行，车停外围停车场；主街网红小吃不如背街老店；古城石板路穿防滑鞋</li></ul></div>
+          </div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li>福道6:00-22:00开放，早上9-10点人最少；停车场常爆满，可停梅峰宾馆附近再步行</li>
+            <li class="hot">开元寺上午9点-下午4点旅行团多，大雄宝殿和东西塔下最挤；免费无需预约，17:00停止入园；早8-9点或下午3点后更舒服</li>
+            <li class="hot">西街周末9:30后人潮汹涌，想拍空街务必8点前到</li>
+            <li class="no">登东西塔20元/人（可选）</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-7" open>
+        <summary>
+          <span class="daynum d7"><small>Day 7</small><big>8.29</big></span>
+          <span class="daytitle"><h3>🌊 泉州 → 厦门</h3><p>簪花体验 × 厦门海边浪漫</p></span>
+          <span class="routeinfo">100km · 1.5h · G15沈海高速</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：8:30 蟳埔村簪花 → 13:00 出发 → 14:30 厦门市思明区（约100km · 1.5h · G15，过路费约45元）· 当晚宿中山路/曾厝垵/沙坡尾</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">8:30-11:00</td><td class="l">📍 泉州市丰泽区·蟳埔村簪花（情侣必玩！）</td><td>国家级非遗簪花围：情侣一起簪花换渔女服饰（基础40-60元/人；含服饰妆造套餐约100-200元/人）；蚵壳厝前拍照、渔人码头渔船+滩涂。选有院子的店铺/巷子里阿嬷簪花，提前问清套餐</td></tr>
+              <tr><td class="t">11:00-12:30</td><td class="l">📍 可选：洛江区·洛阳桥（免费 · 世遗）</td><td>中国最早跨海石桥：桥上石塔+江海交汇、种蛎固基奇观；⚠️ 注意潮汐，退潮时可走桥下礁石</td></tr>
+              <tr><td class="t">12:30-13:00</td><td class="l">🍚 泉州最后一餐</td><td>牛肉羹、姜母鸭（泉州名菜），人均50-80</td></tr>
+              <tr><td class="t">13:00-14:30</td><td class="l">🚗 泉州 → 厦门市思明区</td><td>约100km，1.5h；入住放行李</td></tr>
+              <tr><td class="t">15:00-17:00</td><td class="l">📍 思明区·沙坡尾 + 演武大桥（免费）</td><td>艺术西区ins涂鸦墙、避风坞老渔船+双子塔同框、演武大桥观景平台（世界最近海面的桥）</td></tr>
+              <tr><td class="t">17:30-19:00</td><td class="l">📍 思明区·环岛路自驾 → 黄厝海滩日落</td><td>一边山一边海随停随拍；"一国两制"标语牌、音乐广场、曾厝垵海边</td></tr>
+              <tr><td class="t">19:30-21:30</td><td class="l">📍 中山路 + 八市</td><td>月华沙茶面25（镇邦路·米其林必比登）、莲欢海蛎煎18（局口横巷）、黄玉兰鱼丸15、黄则和花生汤8、阿杰五香10（八市）；19:30-21:20和平码头光影秀（至8/31，免费）</td></tr>
+            </tbody>
+          </table>
+          <div class="grid2">
+            <div class="box"><h5>🍜 厦门必吃（附位置）</h5><ul>
+              <li>沙茶面 25元（月华沙茶面·镇邦路，1985老店）</li>
+              <li>海蛎煎 18元（莲欢·局口横巷，上过《舌尖》）</li>
+              <li>鱼丸 15元（黄玉兰手工鱼丸·中山路）· 花生汤 8元（黄则和）</li>
+              <li>五香卷 10元（阿杰五香·八市）· 土笋冻 15元（开元路老店）</li></ul></div>
+            <div class="box"><h5>🏨 住宿 · 避坑</h5><ul>
+              <li>首选：中山路/老城区 或 曾厝垵海景（步行到海滩5分钟）或 沙坡尾/厦大周边，200-600元</li>
+              <li>想看日出选黄厝海滩方向，想方便逛吃选中山路</li>
+              <li>⚠️ 八市老字号比鼓浪屿便宜很多；鼓浪屿船票提前在官方公众号购买，别信黄牛</li></ul></div>
+          </div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">蟳埔村8:30前到！9点后旅行团涌入，热门店妆造排队1-2小时；周末/暑期午后12-15点最挤</li>
+            <li class="no">簪花建议提前在小红书/美团预约店铺；认准正规店（如晴天姐姐/蟳埔花米，约40元含簪花），别信村口拉客的20元塑料假花</li>
+            <li class="hot">沙坡尾周末节假日避开12:00-16:00高峰，暑期人巨多、路窄易堵</li>
+            <li>环岛路建议早8点前出发或下午4点后；黄厝看日落人比白城少</li>
+            <li>中山路上午人少、下午人多、晚上最热闹；八市早晚都人多，阿杰五香等热门店要排队</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-8" open>
+        <summary>
+          <span class="daynum d8"><small>加餐</small><big>8.30</big></span>
+          <span class="daytitle"><h3>🎹 厦门深度游 · 可选第8天（返程已跳过）</h3><p>鼓浪屿 / 南普陀 / 鹭江夜游</p></span>
+          <span class="routeinfo">按体力自选</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：车停酒店，全天公交/打车/轮渡出行 · 鼓浪屿船票35元/人往返，提前3-5天在"厦门轮渡"小程序购票</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">8:00-12:00</td><td class="l">📍 思明区·鼓浪屿（厦鼓码头乘船）</td><td>世界文化遗产、万国建筑博览：菽庄花园+钢琴博物馆、龙头路（蛋满灌、林记鱼丸、黄则和）；日光岩60元需爬山可跳过；岛上石板路无机动车，慢逛2-3h</td></tr>
+              <tr><td class="t">或 8:30-10:30</td><td class="l">📍 思明区·南普陀寺（免费，需提前预约）</td><td>近厦门大学，千年古刹香火鼎盛，全程平路1-1.5h；红墙绿瓦出片</td></tr>
+              <tr><td class="t">19:30-21:00</td><td class="l">🌃 可选：鹭江夜游 / 和平码头光影秀</td><td>船上live+闽南美食；和平码头光影秀19:30-21:20免费（至8/31）</td></tr>
+            </tbody>
+          </table>
+          <div class="warn"><b>回程部分按你的要求跳过</b>（原攻略为厦门→宁波约680km/8h，可选：两人轮换直接开回、汽车托运+人飞回、或分两天回温州住一晚；需要时再补）。</div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">鼓浪屿船票35元/人往返：提前15天线上预订、每日9点放票；暑期8:00-10:00热门班次开票几分钟约满，别指望现场买当天票（"厦门轮渡"/"屿见厦门"小程序）</li>
+            <li>早8点第一班船上岛人少光线好；或下午4:30后上岛看日落+灯光</li>
+            <li class="no">南普陀寺8:00-18:00需提前预约（每小时一时段，公众号"厦门南普陀寺预约"），节假日易约满；选9-11点光线好、早8-10点人最少</li>
+            <li class="hot">节假日鼓浪屿/南普陀人流极大，务必提前3-5天搞定船票和预约</li></ul></div>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ 情侣必做 ============ -->
+  <section>
+    <h2 class="sec">💞 情侣必做 10 件事</h2>
+    <div class="lovelist">
+      <ol>
+        <li>石塘对戒观景台看日落（可选加站）</li>
+        <li>蟳埔村情侣一起簪花拍照</li>
+        <li>石浦古城夜晚牵手逛渔火</li>
+        <li>紫阳古街从街头吃到巷尾</li>
+        <li>松兰山南沙滩礁石缝抓螃蟹</li>
+        <li>厦门环岛路自驾追日落</li>
+        <li>福州爱心树下吃爱心鱼丸</li>
+        <li>五马街 + 南塘夜市逛吃</li>
+        <li>西街天台咖啡馆看双塔日落</li>
+        <li>沙坡尾避风坞拍文艺大片</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ 预算 ============ -->
+  <section>
+    <h2 class="sec">💰 预算参考（2人 · 7天，合并两版）</h2>
+    <div class="budget">
+      <div class="bcard"><h4>🚗 交通</h4><p>油费（约1,100-1,200km）530-1,000元<br>高速过路费 485-500元<br><b>合计约 1,000-1,100元</b>（不含返程）</p></div>
+      <div class="bcard"><h4>🏨 住宿（7晚）</h4><p>经济型 约1,400元<br>舒适型 2,450-3,500元<br>享受型 3,850元+（石塘海景民宿拉高预算）</p></div>
+      <div class="bcard"><h4>🎫 门票+体验</h4><p>江心屿2人 60元<br>楠溪江竹筏 60-100元<br>蟳埔簪花 100-400元<br>鼓浪屿船票2人 70元<br><b>合计约 400-650元</b>（其他大多免费）</p></div>
+      <div class="bcard"><h4>🍜 餐饮（7天）</h4><p>经济型 1,050-1,500元<br>舒适型 1,750-2,500元<br>享受型（海鲜大餐）2,800元+</p></div>
+      <div class="bcard" style="background:#FFF0EC;border-color:#FFD4CB;"><h4>🎯 合计</h4><p><b>经济型 4,000-5,000元</b><br><b>舒适型 5,500-8,200元</b><br>享受型 8,000-10,500元<br><small style="color:#9B8570">（大部分景点免费：松兰山/石浦夜游/江心屿/古街/三坊七巷/西街/环岛路等）</small></p></div>
+    </div>
+  </section>
+
+  <!-- ============ 行前必看 ============ -->
+  <section>
+    <h2 class="sec">📋 8月行前必看（两版合并）</h2>
+    <div class="tips">
+      <div class="tcard"><h4>🌦️ 天气与防晒</h4><ul>
+        <li>8月浙闽沿海35-38°C，中午12-15点尽量室内休息</li>
+        <li>台风季（7-9月），出发前3天看预报，台风天高速可能封闭</li>
+        <li>SPF50+防晒霜每2小时补涂，帽子+墨镜+防晒衣</li>
+        <li>海边早晚温差大，带薄外套</li></ul></div>
+      <div class="tcard"><h4>🎫 提前预约/购票</h4><ul>
+        <li>鼓浪屿船票：提前3-5天，"厦门轮渡"小程序</li>
+        <li>南普陀寺：提前1天预约（如去）</li>
+        <li>8月旺季住宿提前2-4周预订，尤其福州、泉州、石塘</li>
+        <li>车辆检查：轮胎、刹车、机油、冷却液、玻璃水</li></ul></div>
+      <div class="tcard"><h4>🚗 自驾提醒</h4><ul>
+        <li>长途高速每2小时休息/换人，注意疲劳驾驶</li>
+        <li>象山→台州→温州顺路南下、无折返；台州到福州是最长车程段（约350km），早出发</li>
+        <li>泉州西街机动车限行，车停外围停车场</li>
+        <li>厦门外地车牌不限高峰，可正常进岛</li></ul></div>
+      <div class="tcard"><h4>🧳 随身清单</h4><ul>
+        <li>身份证、驾驶证、行驶证、12123（违章查询）</li>
+        <li>防晒霜/墨镜/遮阳帽、充电宝、车载充电器</li>
+        <li>肠胃药 + 抗过敏药（连续吃海鲜备好）</li>
+        <li>拖鞋/凉鞋（沙滩用）、舒适运动鞋（古城石板路）</li></ul></div>
+      <div class="tcard"><h4>🦐 海鲜注意</h4><ul>
+        <li>吃海鲜别同时喝冰啤酒，容易拉肚子</li>
+        <li>点菜前确认价格和重量，结账核对小票</li>
+        <li>景区门口鱼丸多为冷冻/机器制品，去老字号（通隆/永和/陈辉）</li>
+        <li>象山赶海先查退潮时间</li></ul></div>
+      <div class="tcard"><h4>👫 情侣穿搭</h4><ul>
+        <li>海边（松兰山/环岛路）：白色/浅蓝裙+草帽，男生白T+短裤</li>
+        <li>古城（石浦/紫阳/三坊七巷）：汉服/旗袍/文艺风出片翻倍</li>
+        <li>烟台山/中洲岛：复古文艺风适配洋楼氛围</li>
+        <li>簪花体验店里提供服饰；环岛路情侣装T恤+墨镜</li></ul></div>
+    </div>
+  </section>
+
+  <footer>
+    🗺️ 浙闽沿海网红攻略地图 v2 · 由《新路线》×《网红打卡v2》融合制作（2026-08-16）<br>
+    数据来源：新路线自驾攻略 × 网红打卡v2 ｜ 建议出发前确认景点开放状态与票价
+  </footer>
+</div>
+
+<script>
+  document.querySelectorAll('.stp').forEach(function(g){
+    var svgns = 'http://www.w3.org/2000/svg';
+    var hit = document.createElementNS(svgns, 'circle');
+    hit.setAttribute('r', '46');
+    hit.setAttribute('fill', 'transparent');
+    g.insertBefore(hit, g.firstChild);
+
+    var sx = 0, sy = 0;
+    g.addEventListener('pointerdown', function(e){ sx = e.clientX; sy = e.clientY; });
+    g.addEventListener('click', function(e){
+      if (Math.hypot(e.clientX - sx, e.clientY - sy) > 8) return;
+      var d = g.getAttribute('data-day');
+      if (d && d !== '0') {
+        var el = document.getElementById('day-' + d);
+        if (el) {
+          if (!el.open) el.open = true;
+          el.classList.remove('flash');
+          void el.offsetWidth;
+          el.classList.add('flash');
+          el.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>
