@@ -74,10 +74,22 @@ table.po td:first-child{white-space:nowrap;color:var(--sub);font-weight:600;widt
 #mapHint{position:absolute;z-index:500;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(30,58,95,.82);color:#fff;font-size:11.5px;padding:5px 14px;border-radius:16px;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 #fitBtn{position:absolute;z-index:500;right:14px;bottom:16px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 #fitBtn:hover{background:#F6F0E0}
+#sheetBtn{display:none}
+.sheet-handle{display:none}
 @media (max-width:860px){
+  header{padding:6px 10px 0}
+  h1{font-size:14px}
+  .hd-top{flex-wrap:wrap;row-gap:4px}
+  .cities{margin-left:auto}
   main{flex-direction:column}
-  #map{flex:1}
-  aside{width:100%;flex:none;max-height:42%;border-left:none;border-top:1px solid var(--border)}
+  #map{flex:1;width:100%}
+  aside{position:fixed;left:0;right:0;bottom:0;width:100%;height:52%;max-height:52%;border-left:none;border-top:1px solid var(--border);border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.25);transform:translateY(103%);transition:transform .28s ease;z-index:900;padding-top:22px}
+  aside.open{transform:translateY(0)}
+  #sheetHandle{display:block;position:absolute;top:8px;left:50%;transform:translateX(-50%);width:44px;height:5px;border-radius:3px;background:#D8CBB0;cursor:pointer}
+  #sheetBtn{display:inline-block;position:absolute;right:14px;bottom:54px;z-index:560;background:#fff;border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:12.5px;font-weight:700;color:var(--navy);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+  #mapHint{bottom:90px;font-size:10.5px;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+  #fitBtn{bottom:54px}
+  .leaflet-popup-content{width:232px!important;max-height:240px}
 }
 </style>
 </head>
@@ -95,8 +107,10 @@ table.po td:first-child{white-space:nowrap;color:var(--sub);font-weight:600;widt
   <div id="map">
     <div id="mapHint">🖱️ 拖动画布 · 滚轮缩放 · 点彩色圆点看玩法 · ①=当天动线顺序</div>
     <button id="fitBtn">⤢ 复位视野</button>
+    <button id="sheetBtn">📋 行程表</button>
   </div>
-  <aside>
+  <aside id="sidePanel">
+    <div id="sheetHandle" class="sheet-handle"></div>
     <div class="card" id="dayCard"></div>
     <div class="card" id="timelineCard"></div>
     <div class="card" id="poiList"></div>
@@ -286,6 +300,13 @@ function renderLegend(){
 
 document.getElementById('city-nj').onclick=function(){setCity('nj');};
 document.getElementById('city-sz').onclick=function(){setCity('sz');};
+(function(){
+  var btn=document.getElementById('sheetBtn'),panel=document.getElementById('sidePanel'),hd=document.getElementById('sheetHandle');
+  if(!btn||!panel)return;
+  function setSheet(open){panel.classList.toggle('open',open);btn.textContent=open?'✕ 收起行程':'📋 行程表';}
+  btn.onclick=function(){setSheet(!panel.classList.contains('open'));};
+  if(hd)hd.onclick=function(){setSheet(false);};
+})();
 document.getElementById('fitBtn').onclick=function(){fitTo(currentPts);};
 render();
 
