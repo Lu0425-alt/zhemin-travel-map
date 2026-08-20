@@ -95,12 +95,10 @@ h1 small{font-size:11px;font-weight:400;opacity:.8;margin-left:6px}
 .mk .dot{transition:transform .15s,filter .15s}
 .mk:hover .dot{transform:scale(1.18);filter:brightness(1.06)}
 .mk.hl .dot{transform:scale(1.3)}
-.mk .lbl{font-size:12px;font-weight:700;fill:var(--ink);paint-order:stroke;stroke:rgba(255,246,227,.97);stroke-width:6px;stroke-linejoin:round;pointer-events:none;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
-.mk.stop .lbl{font-size:13px}
-.mk.ctx .lbl{opacity:0;transition:opacity .12s}
-.mk.ctx.lbl-on .lbl{opacity:.92}
-.mk.ctx.lbl-on:hover .lbl{opacity:1}
-.mk.ctx:hover .lbl,.mk.overview:hover .lbl{opacity:1}
+.lbl{font-size:12px;font-weight:700;fill:var(--ink);paint-order:stroke;stroke:rgba(255,246,227,.97);stroke-width:6px;stroke-linejoin:round;pointer-events:none;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+.layer-lbl .lbl{opacity:0;transition:opacity .12s}
+.layer-lbl .lbl.lbl-on{opacity:.95}
+.layer-lbl .lbl.lb-hover{opacity:1}
 .mk.overview .dot{opacity:.6}
 .mk .ic{font-size:13px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
 .mk .numt{font-size:11px;font-weight:800;text-anchor:middle;dominant-baseline:central;fill:var(--ink);pointer-events:none}
@@ -312,14 +310,21 @@ function deco(c){
       h+='<line x1="'+xb.toFixed(1)+'" y1="'+yb.toFixed(1)+'" x2="'+(936+Math.cos(a2*Math.PI/180)*r2b).toFixed(1)+'" y2="'+(66+Math.sin(a2*Math.PI/180)*r2b).toFixed(1)+'" stroke="#FFCD42" stroke-width="4" stroke-linecap="round"/>';}
     h+='<g fill="#fff" opacity=".95"><circle cx="130" cy="80" r="10"/><circle cx="141" cy="74" r="13"/><circle cx="154" cy="78" r="11"/><circle cx="145" cy="86" r="8"/></g>';
   }
+  h+='<g class="deco-north" transform="translate(54,60)"><path d="M0,-17 L8,9 L0,3 L-8,9 Z" fill="#B45309" stroke="#FFF6E3" stroke-width="2"/><text x="0" y="16" text-anchor="middle" font-size="10.5" font-weight="800" fill="#8A7B62" font-family="sans-serif">北</text></g>';
+  h+='<g class="deco-scale" transform="translate(30,'+(VB_H[c]-30)+')"><rect x="0" y="-6" width="74" height="4" rx="2" fill="#8A7B62"/><line x1="0" y1="-6" x2="0" y2="-12" stroke="#8A7B62" stroke-width="2"/><line x1="74" y1="-6" x2="74" y2="-12" stroke="#8A7B62" stroke-width="2"/><text x="37" y="-17" text-anchor="middle" font-size="9.5" fill="#8A7B62" font-weight="700" font-family="sans-serif">≈2km</text></g>';
   return h;
 }
 function centroid(pts){
   var x=0,y=0,n=pts.length;pts.forEach(function(p){x+=p[0];y+=p[1];});
   return [x/n,y/n];
 }
+/* 底图静态标签包围盒（供动态标签避让） */
+var STATIC_BOXES={nj:[],sz:[]};
+function estW(t,fs,ls){return t.length*(fs+ls)+12;}
+function pushSB(c,b){STATIC_BOXES[c].push(b);}
 function buildBase(){
   var c=state.city,h='',metroSeen={};
+  STATIC_BOXES[c]=[];
   WATER[c].forEach(function(f){h+='<path class="water" d="'+smoothD(P(c,f.pts),true)+'" fill="'+f.fill+'" stroke="#8FBEDC" stroke-width="2"/>';});
   HILLS[c].forEach(function(f){h+='<path class="hill" d="'+smoothD(P(c,f.pts),true)+'" fill="'+f.fill+'" stroke="#CFE3C0" stroke-width="2.5"/>';});
   RIVERS[c].forEach(function(r){h+='<path class="river" d="'+smoothD(P(c,r.pts),false)+'" fill="none" stroke="'+r.color+'" stroke-width="'+r.w+'" stroke-linecap="round" stroke-linejoin="round"/>';});
@@ -331,7 +336,9 @@ function buildBase(){
     var pp=proj(c,centroid(b.pts)[0],centroid(b.pts)[1]);
     var area=0;var P2=P(c,b.pts);for(var ai=0;ai<P2.length;ai++){var p1=P2[ai],p2=P2[(ai+1)%P2.length];area+=p1.x*p2.y-p2.x*p1.y;}
     if(Math.abs(area)/2>6000){
+      var dfs=11.5,dw=estW(b.name,dfs,1);
       h+='<text class="geo dist-t" x="'+pp.x.toFixed(1)+'" y="'+(pp.y-14).toFixed(1)+'" text-anchor="middle" style="paint-order:stroke;stroke:#FFF6E3;stroke-width:5px;font-size:11.5px">'+b.name+'</text>';
+      pushSB(c,{x:pp.x-dw/2,y:(pp.y-14)-(dfs+8)/2,w:dw,h:dfs+8});
     }
   });
   // 地铁
@@ -359,6 +366,8 @@ function buildBase(){
           if(score<bestScore){bestScore=score;best=o;}
         });
         h+='<text class="geo metro-t" x="'+(q.x+best.dx).toFixed(1)+'" y="'+(q.y+best.dy).toFixed(1)+'" text-anchor="'+best.an+'">'+s[0]+'</text>';
+        var mw=estW(s[0],10.5,0.5),mx=best.an==='end'?(q.x+best.dx-mw):(q.x+best.dx);
+        pushSB(c,{x:mx,y:(q.y+best.dy)-(10.5+8)/2,w:mw,h:10.5+8});
       }
     });
   });
@@ -367,8 +376,19 @@ function buildBase(){
     var wall=[[32.034,118.758],[32.052,118.778],[32.058,118.798],[32.048,118.818],[32.028,118.820],[32.012,118.802],[32.014,118.776],[32.024,118.758]];
     h+='<path class="wall" d="'+smoothD(P(c,wall),true)+'" fill="none" stroke="#D9C9A8" stroke-width="2.5" stroke-dasharray="6 6"/>';
   }
-  LABELS[c].forEach(function(l){var pt=proj(c,l.at[0],l.at[1]);h+='<text class="geo '+(l.cls||'')+'" x="'+pt.x.toFixed(1)+'" y="'+pt.y.toFixed(1)+'">'+l.t+'</text>';});
-  (LANDMARKS[c]||[]).forEach(function(l){var pt=proj(c,l[1],l[2]);h+='<text class="geo sub-t" x="'+pt.x.toFixed(1)+'" y="'+pt.y.toFixed(1)+'">'+l[0]+'</text>';});
+  LABELS[c].forEach(function(l){
+    var pt=proj(c,l.at[0],l.at[1]);
+    h+='<text class="geo '+(l.cls||'')+'" x="'+pt.x.toFixed(1)+'" y="'+pt.y.toFixed(1)+'">'+l.t+'</text>';
+    var cls=l.cls||'',fs=cls==='water-t'?15:cls==='hill-t'?14:cls==='sub-t'||cls==='dist-t'?12.5:14;
+    var ls=cls==='sub-t'||cls==='dist-t'?1:2,w=estW(l.t,fs,ls);
+    pushSB(c,{x:pt.x,y:pt.y-(fs+8)/2,w:w,h:fs+8});
+  });
+  (LANDMARKS[c]||[]).forEach(function(l){
+    var pt=proj(c,l[1],l[2]);
+    h+='<text class="geo sub-t" x="'+pt.x.toFixed(1)+'" y="'+pt.y.toFixed(1)+'">'+l[0]+'</text>';
+    var fs=11,w=l[0].length*(fs+1)+10;
+    pushSB(c,{x:pt.x,y:pt.y-(fs+8)/2,w:w,h:fs+8});
+  });
   h+=deco(c);
   return h;
 }
@@ -458,7 +478,7 @@ function drawMarkers(){
     var pt=ADJ[p.id]||proj(c,p.lat,p.lng);
     centers.push({p:p,x:pt.x,y:pt.y});
   });
-  var placed=[];
+  var placed=[],labelItems=[];
   centers.forEach(function(it){
     var p=it.p,pt={x:it.x,y:it.y},g=document.createElementNS(NS,'g');
     var num=idx[p.id],isStop=d!==null&&num!==undefined;
@@ -474,7 +494,7 @@ function drawMarkers(){
       inner='<circle class="dot" r="10.5" fill="'+CATS[p.cat].color+'" stroke="#fff" stroke-width="2.5"/>';
       inner+='<text class="ic" y="1">'+CATICON[p.cat]+'</text>';
     }
-    // 标签（8 向避让 + 最差兜底）
+    // 标签（8 向避让 + 微偏移细化；独立图层置顶避免被后画圆点遮挡）
     var hoverOnly=(d!==null)&&!isStop&&(p.cat==='hotel'||p.cat==='transit');
     if(d===null){
       inner+='<title>'+p.name+'</title>';
@@ -485,37 +505,74 @@ function drawMarkers(){
                    {dx:34,dy:-18,an:'start'},{dx:-34,dy:-18,an:'end'},{dx:34,dy:22,an:'start'},{dx:-34,dy:22,an:'end'}];
       if(num===1)anchors=[{dx:0,dy:-28,an:'middle'},{dx:0,dy:34,an:'middle'},{dx:-28,dy:2,an:'end'},{dx:28,dy:2,an:'start'},{dx:-34,dy:22,an:'end'},{dx:34,dy:22,an:'start'}];
       if(num===centers.length)anchors=[{dx:0,dy:34,an:'middle'},{dx:0,dy:-28,an:'middle'},{dx:28,dy:2,an:'start'},{dx:-28,dy:2,an:'end'}];
+      function scoreBox(lx,ly,an){
+        var box={x:(an==='end'?lx-nw:an==='middle'?lx-nw/2:lx),y:ly-nh/2,w:nw,h:nh};
+        var sc=0,ls=0;
+        for(var bi=0;bi<placed.length;bi++){var q=placed[bi];if(box.x<q.x+q.w&&box.x+box.w>q.x&&box.y<q.y+q.h&&box.y+box.h>q.y){sc+=3;ls++;}}
+        for(var ci=0;ci<centers.length;ci++){var o=centers[ci];if(o.p.id===p.id)continue;if(o.x>box.x-13&&o.x<box.x+box.w+13&&o.y>box.y-13&&o.y<box.y+box.h+13)sc+=8;}
+        var sbs=STATIC_BOXES[c];
+        for(var si=0;si<sbs.length;si++){var q2=sbs[si];
+          if(box.x<q2.x+q2.w+4&&box.x+box.w>q2.x-4&&box.y<q2.y+q2.h+4&&box.y+box.h>q2.y-4)sc+=6;
+          else if(box.x<q2.x+q2.w+18&&box.x+box.w>q2.x-18&&box.y<q2.y+q2.h+18&&box.y+box.h>q2.y-18)sc+=1;}
+        return {score:sc,lblScore:ls,box:box};
+      }
       var best=null,bestScore=1e9,bestLbl=1e9;
       for(var ai=0;ai<anchors.length;ai++){
-        var a=anchors[ai],lx=pt.x+a.dx,ly=pt.y+a.dy;
-        var box={x:(a.an==='end'?lx-nw:a.an==='middle'?lx-nw/2:lx),y:ly-nh/2,w:nw,h:nh};
-        var score=0;
-        var lblScore=0;for(var bi=0;bi<placed.length;bi++){var q=placed[bi];if(box.x<q.x+q.w&&box.x+box.w>q.x&&box.y<q.y+q.h&&box.y+box.h>q.y){score+=3;lblScore++;}}
-        for(var ci=0;ci<centers.length;ci++){
-          var o=centers[ci];
-          if(o.p.id===p.id)continue;
-          if(o.x>box.x-13&&o.x<box.x+box.w+13&&o.y>box.y-13&&o.y<box.y+box.h+13)score+=8;
-        }
-        if(score<bestScore||(score===bestScore&&lblScore<bestLbl)){bestScore=score;bestLbl=lblScore;best={a:a,box:box};}
-        if(score===0)break;
+        var a=anchors[ai],r=scoreBox(pt.x+a.dx,pt.y+a.dy,a.an);
+        if(r.score<bestScore||(r.score===bestScore&&r.lblScore<bestLbl)){bestScore=r.score;bestLbl=r.lblScore;best={a:a,box:r.box};}
+        if(r.score===0)break;
+      }
+      var fine=best,fineScore=bestScore,fineLbl=bestLbl;
+      for(var ox=-36;ox<=36;ox+=9)for(var oy=-18;oy<=18;oy+=9){
+        if(ox===0&&oy===0)continue;
+        var r2=scoreBox(pt.x+best.a.dx+ox,pt.y+best.a.dy+oy,best.a.an);
+        r2.score+=(Math.abs(ox)+Math.abs(oy))/9;
+        if(r2.score<fineScore||(r2.score===fineScore&&r2.lblScore<fineLbl)){fineScore=r2.score;fineLbl=r2.lblScore;fine={a:{dx:best.a.dx+ox,dy:best.a.dy+oy,an:best.a.an},box:r2.box};}
       }
       // 钳制在画布内
-      var bx=best.box,shiftX=0,shiftY=0;
+      var bx=fine.box,shiftX=0,shiftY=0;
       if(bx.x<12)shiftX=12-bx.x;
       if(bx.x+bx.w>VB_W-12)shiftX=(VB_W-12)-(bx.x+bx.w);
       if(bx.y<12)shiftY=12-bx.y;
       if(bx.y+bx.h>VB_H[c]-12)shiftY=(VB_H[c]-12)-(bx.y+bx.h);
-      if(shiftX){best.a.dx+=shiftX;bx.x+=shiftX;}
-      if(shiftY){best.a.dy+=shiftY;bx.y+=shiftY;}
+      if(shiftX){fine.a.dx+=shiftX;bx.x+=shiftX;}
+      if(shiftY){fine.a.dy+=shiftY;bx.y+=shiftY;}
       placed.push(bx);
       var lblCls='lbl'+(isStop?' stop-lbl':'')+(hoverOnly?'':' lbl-on');
-      inner+='<text class="'+lblCls+'" x="'+best.a.dx+'" y="'+best.a.dy+'" text-anchor="'+best.a.an+'" style="font-size:'+fs+'px">'+p.name+'</text>';
+      labelItems.push({x:pt.x,y:pt.y,dx:fine.a.dx,dy:fine.a.dy,an:fine.a.an,fs:fs,cls:lblCls,name:p.name});
     }
     g.innerHTML=inner;
     g.addEventListener('click',function(ev){ev.stopPropagation();openPopup(p);});
+    if(d!==null)g.setAttribute('data-lbl',String(labelItems.length-1));
     layer.appendChild(g);
   });
   worldG.appendChild(layer);
+  if(labelItems.length){
+    var lblLayer=document.createElementNS(NS,'g');
+    lblLayer.setAttribute('class','layer-lbl');
+    labelItems.forEach(function(it){
+      var t=document.createElementNS(NS,'text');
+      t.setAttribute('class',it.cls);
+      t.setAttribute('x',String(it.dx));t.setAttribute('y',String(it.dy));
+      t.setAttribute('text-anchor',it.an);
+      t.setAttribute('transform','translate('+it.x.toFixed(1)+','+it.y.toFixed(1)+')');
+      t.setAttribute('style','font-size:'+it.fs+'px');
+      t.textContent=it.name;
+      lblLayer.appendChild(t);
+    });
+    var lbls=lblLayer.children;
+    for(var mi=0;mi<layer.children.length;mi++){
+      (function(mk){
+        var li=mk.getAttribute('data-lbl');
+        if(li===null)return;
+        var lt=lbls[+li];
+        if(!lt)return;
+        mk.addEventListener('mouseenter',function(){lt.classList.add('lb-hover');});
+        mk.addEventListener('mouseleave',function(){lt.classList.remove('lb-hover');});
+      })(layer.children[mi]);
+    }
+    worldG.appendChild(lblLayer);
+  }
 }
 
 /* ---- 图层：当日动线 ---- */
