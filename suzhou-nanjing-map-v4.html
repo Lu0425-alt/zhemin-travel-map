@@ -218,7 +218,7 @@ function fitTo(lls,forceMin){
   var b=L.latLngBounds(lls);
   map.fitBounds(b,{padding:[20,20],maxZoom:16});
   var z=map.getZoom()+3;
-  if(forceMin&&z<16)z=16;
+  if(forceMin&&z<17)z=17;
   if(z>18)z=18;
   map.setZoom(z,{animate:false});
 }
@@ -272,7 +272,7 @@ function showTimeline(){
   el.querySelectorAll('.lk').forEach(function(elm){
     elm.onclick=function(){
       var p=findPOI(c,elm.getAttribute('data-loc'));
-      if(p&&markerRef[p.id]){map.flyTo(markerRef[p.id].getLatLng(),15,{duration:.6});markerRef[p.id].openPopup();}
+      if(p&&markerRef[p.id]){map.flyTo(markerRef[p.id].getLatLng(),17,{duration:.6});markerRef[p.id].openPopup();}
     };
   });
 }
@@ -290,7 +290,7 @@ function showPoiList(){
   el.querySelectorAll('.poi').forEach(function(elm){
     elm.onclick=function(){
       var p=findPOI(c,elm.getAttribute('data-id'));
-      if(p&&markerRef[p.id]){map.flyTo(markerRef[p.id].getLatLng(),15,{duration:.6});markerRef[p.id].openPopup();}
+      if(p&&markerRef[p.id]){map.flyTo(markerRef[p.id].getLatLng(),17,{duration:.6});markerRef[p.id].openPopup();}
     };
   });
 }
