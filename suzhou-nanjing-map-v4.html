@@ -90,6 +90,8 @@ table.po td:first-child{white-space:nowrap;color:var(--sub);font-weight:600;widt
   #mapHint{bottom:90px;font-size:10.5px;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
   #fitBtn{bottom:54px}
   .leaflet-popup-content{width:232px!important;max-height:240px}
+  .pin.stop{width:27px;height:27px;font-size:13px;border-width:2px}
+  .pin.ctx{width:21px;height:21px;font-size:10px}
 }
 </style>
 </head>
@@ -214,9 +216,9 @@ function render(){
 function fitTo(lls){
   if(!lls.length)return;
   var b=L.latLngBounds(lls);
-  map.fitBounds(b,{padding:[44,44],maxZoom:16});
-  var z=map.getZoom()+1;
-  if(z>17)z=17;
+  map.fitBounds(b,{padding:[24,24],maxZoom:16});
+  var z=map.getZoom()+2;
+  if(z>18)z=18;
   map.setZoom(z,{animate:false});
 }
 
