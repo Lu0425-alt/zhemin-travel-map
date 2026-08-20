@@ -209,15 +209,16 @@ function render(){
       L.polyline(pts,{color:DAYMETA[c][d].color,weight:4,opacity:.8,dashArray:'7 8',lineCap:'round'}).addTo(layer);
     }
   }
-  fitTo(currentPts);
+  fitTo(currentPts,d!==null);
   showDayCard();showTimeline();showPoiList();renderLegend();
 }
 
-function fitTo(lls){
+function fitTo(lls,forceMin){
   if(!lls.length)return;
   var b=L.latLngBounds(lls);
-  map.fitBounds(b,{padding:[24,24],maxZoom:16});
-  var z=map.getZoom()+2;
+  map.fitBounds(b,{padding:[20,20],maxZoom:16});
+  var z=map.getZoom()+3;
+  if(forceMin&&z<16)z=16;
   if(z>18)z=18;
   map.setZoom(z,{animate:false});
 }
@@ -312,7 +313,7 @@ document.getElementById('city-sz').onclick=function(){setCity('sz');};
   btn.onclick=function(){setSheet(!panel.classList.contains('open'));};
   if(hd)hd.onclick=function(){setSheet(false);};
 })();
-document.getElementById('fitBtn').onclick=function(){fitTo(currentPts);};
+document.getElementById('fitBtn').onclick=function(){fitTo(currentPts,state.day!==null);};
 render();
 
 </script>
