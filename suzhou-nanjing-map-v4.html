@@ -27,7 +27,7 @@ h1 small{font-size:11px;font-weight:400;opacity:.8;margin-left:6px}
 .day-tab.on{background:#fff;color:var(--navy);font-weight:800}
 .day-tab .dd{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
 main{display:flex;flex:1;min-height:0}
-#map{flex:1;min-width:0;background:#e8e0d0}
+#map{flex:1;min-width:0;background:#f4f1e9}
 aside{width:330px;flex:none;overflow-y:auto;background:var(--bg);border-left:1px solid var(--border);display:flex;flex-direction:column;gap:10px;padding:10px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;box-shadow:0 1px 4px rgba(120,90,40,.08)}
 .card h3{font-size:13.5px;color:var(--navy);margin-bottom:6px;display:flex;align-items:center;gap:6px}
@@ -96,7 +96,7 @@ table.po td:first-child{white-space:nowrap;color:var(--sub);font-weight:600;widt
 <body>
 <header>
   <div class="hd-top">
-    <h1>苏州+南京 · 情侣旅行攻略交互地图<small>8/23-8/30 · 6天5晚</small></h1>
+    <h1>苏州+南京 · 情侣旅行攻略交互地图<small>8/23-8/30 · 6天5晚 · 高清地图</small></h1>
     <div class="cities">
       <button id="city-sz">苏州</button><button id="city-nj" class="on">南京</button>
     </div>
@@ -146,7 +146,7 @@ var layer,markerRef={},currentPts=[];
 
 var map=L.map('map',{zoomControl:true,attributionControl:true}).setView([32.06,118.78],12);
 L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',{
-  subdomains:['1','2','3','4'],maxZoom:18,attribution:'© 高德地图'
+  subdomains:['1','2','3','4'],maxZoom:18,maxNativeZoom:18,detectRetina:true,attribution:'© 高德地图'
 }).addTo(map);
 L.control.scale({imperial:false}).addTo(map);
 layer=L.layerGroup().addTo(map);
