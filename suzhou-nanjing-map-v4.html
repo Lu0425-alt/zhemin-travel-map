@@ -214,7 +214,10 @@ function render(){
 function fitTo(lls){
   if(!lls.length)return;
   var b=L.latLngBounds(lls);
-  map.fitBounds(b,{padding:[70,70],maxZoom:15});
+  map.fitBounds(b,{padding:[44,44],maxZoom:16});
+  var z=map.getZoom()+1;
+  if(z>17)z=17;
+  map.setZoom(z,{animate:false});
 }
 
 function setDay(n){
