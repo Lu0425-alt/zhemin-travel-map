@@ -1,836 +1,714 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>苏州+南京 · 情侣旅行攻略交互地图（8/23-8/30）</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>苏州南京双城攻略地图 · 8天7晚 · 鹿老弟情侣出行</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
-:root{
-  --bg:#FFF3DC; --mapbg:#F7EED8; --card:#FFFFFF; --border:#C89B74;
-  --ink:#3B4252; --navy:#1E3A5F; --sub:#7A7262; --amber:#B45309;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{display:flex;flex-direction:column;font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
-header{background:linear-gradient(135deg,#13203a 0%,#1f3a5f 55%,#2b4f7a 100%);color:#fff;padding:10px 16px 0;box-shadow:0 2px 10px rgba(20,30,50,.25);position:relative;z-index:600}
-.hd-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-h1{font-size:17px;font-weight:800;letter-spacing:.4px;white-space:nowrap}
-h1 small{font-size:11px;font-weight:400;opacity:.8;margin-left:6px}
-.city-switch{display:flex;background:rgba(255,255,255,.14);border-radius:999px;padding:3px;margin-left:auto}
-.city-switch button{border:none;background:transparent;color:#c9d6e8;padding:4px 14px;border-radius:999px;font-size:13px;cursor:pointer;transition:.2s}
-.city-switch button.on{background:#fff;color:var(--navy);font-weight:700}
-.hd-meta{font-size:11.5px;color:#b9c8dd;margin:6px 0 8px;display:flex;gap:12px;flex-wrap:wrap}
-.hd-meta span{display:inline-flex;align-items:center;gap:3px}
-#dayTabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin}
-.day-tab{border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#e6edf7;border-radius:999px;padding:5px 12px;font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:.15s}
-.day-tab .dd{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.day-tab:hover{background:rgba(255,255,255,.2)}
-.day-tab.on{background:#fff;color:var(--navy);font-weight:700;border-color:#fff}
-.day-tab.on .dd{outline:2px solid rgba(30,58,95,.25);outline-offset:1px}
-.day-tab.overview{font-weight:600}
-#layout{flex:1;display:flex;min-height:0}
-#side{width:340px;background:transparent;overflow-y:auto;padding:14px 10px 14px 14px;flex-shrink:0;display:flex;flex-direction:column;gap:12px}
-.card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:12px 14px;box-shadow:0 3px 10px rgba(160,120,70,.12)}
-#dayTitle{font-size:16px;font-weight:800;color:var(--navy);display:flex;align-items:center;gap:8px}
-#dayTitle .dd{width:12px;height:12px;border-radius:50%;flex-shrink:0}
-#daySub{font-size:11.5px;color:var(--sub);margin-top:2px}
-.route-list{margin-top:10px;display:flex;flex-direction:column;gap:0}
-.route-item{display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:12.5px}
-.route-item .n{width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.route-item .ic{flex-shrink:0}
-.route-item .t{flex:1;min-width:0}
-.route-item .t b{font-weight:700;color:var(--ink)}
-.route-item .t span{display:block;font-size:11px;color:var(--sub)}
-.book-box{background:#FFF8E7;border:1.5px solid #E3C87A;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.75}
-.book-box b{color:#92600A;font-size:12.5px}
-.book-box ul{padding-left:16px;color:#7A5B12}
-#card{display:none}
-#card .cd{font-weight:800;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:6px;color:var(--navy)}
-#card .cd i{width:10px;height:10px;border-radius:3px;display:inline-block;flex-shrink:0}
-#card ul{padding-left:18px;color:#4a4f5a;font-size:12.5px;line-height:1.85}
-#card li{margin:2px 0}
-#card .cost{margin-top:8px;color:var(--amber);font-weight:700;font-size:12.5px;background:#FEF3E2;border-radius:8px;padding:6px 9px}
-.legend{font-size:11.5px;color:var(--sub);line-height:1.8;display:flex;flex-wrap:wrap;gap:4px 12px}
-.legend .it{display:inline-flex;align-items:center;gap:5px}
-.legend .d{width:10px;height:10px;border-radius:50%;display:inline-block}
-#map{flex:1;min-width:0;position:relative;margin:12px 14px 14px 0;background:var(--mapbg);border:2px solid var(--border);border-radius:20px;overflow:hidden;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
-#map.dragging{cursor:grabbing}
-#svgMap{position:absolute;inset:0;width:100%;height:100%}
-.world{transition:transform .25s ease}
-.world.nosmooth{transition:none}
-.water{stroke-linejoin:round}
-.geo{font-size:15px;font-weight:800;fill:#7c9fbf;letter-spacing:2px;pointer-events:none}
-.geo.water-t{fill:#5c86a8}
-.geo.hill-t{fill:#7a9c66}
-.mk{cursor:pointer}
-.mk .dot{transition:transform .15s,filter .15s}
-.mk:hover .dot{transform:scale(1.22);filter:brightness(1.05)}
-.mk.hl .dot{transform:scale(1.35)}
-.mk .lbl{font-size:12.5px;font-weight:700;fill:var(--ink);paint-order:stroke;stroke:rgba(255,243,220,.98);stroke-width:6px;stroke-linejoin:round;pointer-events:none;opacity:1}
-.mk.overview .lbl{opacity:0;transition:opacity .12s}
-.mk.ctx .lbl{opacity:0;transition:opacity .12s}
-.mk.ctx:hover .lbl{opacity:1}
-.mk.ctx .dot{opacity:.85}
-.mk.overview:hover .lbl{opacity:1}
-.mk .ic{font-size:14px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
-.mk .num{pointer-events:none}
-.mk .numt{font-size:10.5px;font-weight:800;text-anchor:middle;dominant-baseline:central;fill:var(--ink);pointer-events:none}
-.mk.overview .dot{opacity:.55}
-.rt-line{fill:none;stroke-width:4;stroke-dasharray:2 11;stroke-linecap:round;opacity:.9}
-.rt-start{font-size:11px;font-weight:800;fill:#2E9E5B;paint-order:stroke;stroke:rgba(255,255,255,.95);stroke-width:4px;pointer-events:none}
-.rt-arrow{fill:#fff;stroke-width:1.5}
-#popup{position:absolute;right:12px;bottom:12px;width:min(330px,calc(100% - 24px));background:#fff;border:1.5px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(60,40,10,.28);padding:12px 14px;font-size:12.5px;line-height:1.7;color:#4a4f5a;display:none;z-index:30;max-height:58%;overflow-y:auto}
-#popup.show{display:block;animation:up .18s ease}
-@keyframes up{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
-#popup .pop-t{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:6px;padding-right:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-#popup .tag{color:#fff;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap}
-#popup .row{display:flex;gap:8px;margin:4px 0}
-#popup .row b{color:var(--ink);flex-shrink:0;min-width:52px;font-weight:700}
-#popup .note{margin-top:8px;padding:7px 9px;background:#FFF8E7;border:1px solid #F0DCA8;border-radius:9px;color:#8A5A10}
-#popup .warn{margin-top:6px;padding:7px 9px;background:#FEF2F2;border:1px solid #F5C2C2;border-radius:9px;color:#9B1C1C}
-#popup .x{position:absolute;top:8px;right:10px;border:none;background:#F3E9D8;color:#8a7a5c;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1}
-#popup .x:hover{background:#E8D9BD;color:var(--ink)}
-#zoomBox{position:absolute;right:12px;top:12px;z-index:20;display:flex;flex-direction:column;gap:6px}
-#zoomBox button{width:30px;height:30px;border:1.5px solid var(--border);background:#fff;border-radius:9px;font-size:15px;font-weight:800;color:var(--navy);cursor:pointer;box-shadow:0 2px 6px rgba(160,120,70,.18);line-height:1}
-#zoomBox button:hover{background:#FBF1DC}
-#fitBtn{position:absolute;left:12px;bottom:12px;z-index:20;border:1.5px solid var(--border);background:#fff;border-radius:999px;padding:5px 12px;font-size:11.5px;color:var(--navy);cursor:pointer;box-shadow:0 2px 6px rgba(160,120,70,.18)}
-#fitBtn:hover{background:#FBF1DC}
-#mapHint{position:absolute;left:12px;top:12px;z-index:20;background:rgba(255,255,255,.92);border:1.5px solid var(--border);border-radius:999px;padding:4px 11px;font-size:11px;color:var(--sub);box-shadow:0 2px 6px rgba(160,120,70,.15);pointer-events:none}
-@media (max-width:860px){
-  #layout{flex-direction:column}
-  #side{width:100%;order:2;padding:12px}
-  #map{order:1;height:56vh;margin:12px}
-  h1{font-size:15px}
-  .hd-meta{gap:6px}
-}
+  :root{
+    --bg:#FFF7EF; --card:#FFFFFF; --ink:#4A3728; --sub:#9B8570;
+    --coral:#FF7A6E; --coral-d:#F2644F; --yellow:#FFC94D; --mint:#7FD8B0;
+    --sky:#8EC9F5; --sea:#62C6E8; --lilac:#B79CE8; --line:#F2DCC8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;line-height:1.65;}
+  .wrap{max-width:1080px;margin:0 auto;padding:18px 16px 60px;}
+  header.hero{text-align:center;padding:34px 16px 10px;}
+  .hero .kicker{display:inline-block;background:var(--yellow);color:#5A3E00;font-weight:700;font-size:13px;padding:4px 14px;border-radius:999px;letter-spacing:1px;}
+  h1{font-size:29px;margin:12px 0 6px;letter-spacing:1px;}
+  .hero p.sub{color:var(--sub);font-size:15px;}
+  .hero .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px;}
+  .chip{background:#fff;border:2px solid var(--line);border-radius:999px;padding:5px 13px;font-size:13px;color:var(--ink);}
+  .chip b{color:var(--coral-d);}
+  section{margin-top:34px;}
+  h2.sec{font-size:21px;display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  h2.sec::after{content:"";flex:1;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--coral),var(--yellow),var(--mint));}
+  .mapbox{background:linear-gradient(180deg,#FFF9E8 0%,#FFF0DC 55%,#FFEAD2 100%);border-radius:22px;padding:14px;box-shadow:0 10px 30px rgba(244,138,90,.18);}
+  .mapbox svg{width:100%;height:auto;display:block;}
+  .realmap{height:620px;border-radius:18px;border:3px solid var(--line);z-index:0;}
+  @media(max-width:640px){.realmap{height:480px;}}
+  .rmk-wrap{background:none;border:none;}
+  .rmk{position:relative;width:40px;height:40px;background:#fff;border:3px solid var(--coral);border-radius:50% 50% 50% 8px;box-shadow:0 3px 8px rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;}
+  .rmk .re{font-size:20px;line-height:1;}
+  .rmk-wrap.sel .rmk{border-color:#F2644F;background:#FFD9CF;animation:rmkpulse 1.1s ease-out infinite;}
+  @keyframes rmkpulse{0%{box-shadow:0 0 0 0 rgba(242,100,79,.55);}100%{box-shadow:0 0 0 16px rgba(242,100,79,0);}}
+  .rmk-label{background:#fff;border:2px solid #F2644F;color:#F2644F;font-size:13px;font-weight:800;border-radius:999px;padding:2px 8px;box-shadow:0 2px 8px rgba(0,0,0,.25);white-space:nowrap;text-align:center;pointer-events:none;}
+  .gotomap{display:inline-block;background:#FFF0EC;color:#E05A3F;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:1px;white-space:nowrap;}
+  .rmk .rp{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--coral);color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:1px 6px;white-space:nowrap;}
+  .dayfilters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .dayfilters button{background:#fff;border:2px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;}
+  .dayfilters button.on{background:var(--coral);border-color:var(--coral);color:#fff;}
+  .leaflet-popup-content b{color:var(--coral-d);}
+  .leaflet-container{font-family:"Microsoft YaHei","PingFang SC",sans-serif;}
+  .stp{cursor:pointer;}
+  .stp:hover{filter:drop-shadow(0 2px 6px rgba(244,130,90,.6));}
+  .stp:hover .ring{fill:#FFD9CF;stroke:#FF7A6E;stroke-width:4;}
+  .stp.active .ring{fill:#FFD9CF;stroke:#F2644F;stroke-width:5;}
+  .stp.active text.city{font-weight:900;fill:#F2644F;}
+  .stp .pulse{opacity:0;}
+  .stp.active .pulse{opacity:1;animation:pulse 1.6s ease-out infinite;transform-box:fill-box;transform-origin:center;}
+  @keyframes pulse{0%{transform:scale(.75);opacity:.85;}100%{transform:scale(1.65);opacity:0;}}
+  .stp .ring{fill:#fff;stroke:#FF9B87;stroke-width:3;}
+  .stp.main .ring{fill:#FFE3DB;}
+  .stp text.city{font-size:24px;font-weight:800;fill:#4A3728;}
+  .stp text.day{font-size:13px;font-weight:700;fill:#fff;}
+  .stp .daypill{fill:var(--coral);}
+  .stp text.tag{font-size:13px;font-weight:600;fill:#9B8570;}
+  .route{fill:none;stroke:#FF9B87;stroke-width:6;stroke-linecap:round;stroke-dasharray:12 9;opacity:.9;}
+  .route.back{stroke:#C9B2F2;stroke-width:4;stroke-dasharray:5 8;opacity:.8;}
+  .deco{opacity:.85;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:13px;color:var(--sub);align-items:center;}
+  .legend .dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:4px;vertical-align:-2px;}
+  .hint{font-size:13px;color:var(--sub);margin-top:8px;text-align:center;}
+  .days{display:flex;flex-direction:column;gap:16px;}
+  details.day{background:#fff;border:2px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(160,110,60,.07);scroll-margin-top:16px;}
+  details.day summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  details.day summary::-webkit-details-marker{display:none;}
+  details.day[open]{border-color:var(--coral);}
+  .daynum{flex:0 0 auto;width:58px;height:58px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:800;line-height:1.1;}
+  .daynum small{font-size:11px;font-weight:600;opacity:.9;}
+  .daynum big{font-size:20px;}
+  .d1{background:linear-gradient(135deg,#FFB25E,#FF8A5C);} .d2{background:linear-gradient(135deg,#FF8A9B,#FF6E7F);}
+  .d3{background:linear-gradient(135deg,#7FD8B0,#4DBE8D);} .d4{background:linear-gradient(135deg,#8EC9F5,#5AA9E6);}
+  .d5{background:linear-gradient(135deg,#B79CE8,#9673D9);} .d6{background:linear-gradient(135deg,#FFC94D,#F5A623);}
+  .d7{background:linear-gradient(135deg,#8BD3C7,#5AB8A8);} .d8{background:linear-gradient(135deg,#FF9E7A,#F26D4F);}
+  .daytitle{flex:1;min-width:200px;}
+  .daytitle h3{font-size:18px;}
+  .daytitle p{font-size:13px;color:var(--sub);}
+  .routeinfo{font-size:13px;color:var(--coral-d);font-weight:700;background:#FFF0EC;border-radius:999px;padding:5px 12px;}
+  .body{padding:4px 20px 20px;}
+  .drive{background:#FFF7DC;border:2px solid #F5DFA8;border-radius:12px;padding:9px 13px;font-size:13px;color:#8A6D00;font-weight:600;margin-bottom:14px;}
+  table.timeline{width:100%;border-collapse:collapse;font-size:13px;background:#fff;margin-bottom:4px;}
+  .timeline th{background:#FFF0EC;color:#B94A35;font-weight:700;padding:7px 10px;text-align:left;border:1px solid var(--line);}
+  .timeline td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;color:#5C4A38;}
+  .timeline td.t{white-space:nowrap;font-weight:800;color:var(--coral-d);width:96px;}
+  .timeline td.l{font-weight:700;width:30%;color:#4A3728;}
+  .timeline td.l.clk{cursor:pointer;}
+  .timeline td.l.clk:hover{background:#FFF0EC;text-decoration:underline;}
+  @media(max-width:480px){.timeline td.t{white-space:normal;width:72px;}}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+  .box{background:#FDF6EE;border:1.5px dashed var(--line);border-radius:14px;padding:12px 14px;}
+  .box h5{font-size:14px;margin-bottom:6px;}
+  .box ul{list-style:none;}
+  .box li{font-size:13px;color:#6B5744;padding:2px 0 2px 18px;position:relative;}
+  .box li::before{content:"•";position:absolute;left:2px;color:var(--coral);font-weight:800;}
+  .optbox{background:#F6F0FF;border:2px dashed #C9B2F2;border-radius:14px;padding:12px 14px;margin-top:14px;}
+  .optbox h5{font-size:14px;margin-bottom:6px;color:#7A55C4;}
+  .optbox ul{list-style:none;}
+  .optbox li{font-size:13px;color:#5E4A8A;padding:2px 0 2px 20px;position:relative;}
+  .optbox li::before{content:"✨";position:absolute;left:0;font-size:12px;}
+  .optbadge{background:#F3E9FF;color:#7A55C4;font-size:12px;font-weight:700;border-radius:999px;padding:4px 11px;border:1.5px dashed #C9B2F2;}
+  .warn{background:#FFF3F0;border:2px solid #FFD4CB;border-radius:12px;padding:10px 14px;font-size:13px;color:#B94A35;margin-top:12px;}
+  .warn b{color:#E05A3F;}
+  .crowd{background:#EFF8FF;border:2px solid #B8DFF7;border-radius:14px;padding:12px 14px;margin-top:14px;}
+  .crowd h5{font-size:14px;margin-bottom:6px;color:#1F6FB0;}
+  .crowd ul{list-style:none;}
+  .crowd li{font-size:13px;color:#2C5E86;padding:2px 0 2px 22px;position:relative;}
+  .crowd li::before{content:"⏰";position:absolute;left:0;font-size:12px;}
+  .crowd li.no::before{content:"📋";}
+  .crowd li.hot::before{content:"🔥";}
+  .budget{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}
+  .bcard{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;}
+  .bcard h4{font-size:15px;margin-bottom:8px;color:var(--coral-d);}
+  .bcard p{font-size:13px;color:#6B5744;}
+  .tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+  .tcard{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;}
+  .tcard h4{font-size:15px;margin-bottom:8px;}
+  .tcard ul{list-style:none;}
+  .tcard li{font-size:13px;color:#6B5744;padding:2px 0 2px 18px;position:relative;}
+  .tcard li::before{content:"✓";position:absolute;left:0;color:var(--mint);font-weight:800;}
+  .tcard li.hot::before{content:"🔥";}
+  .lovelist{background:#FFF0F3;border:2px dashed #FFB3C0;border-radius:16px;padding:16px 20px;}
+  .lovelist ol{padding-left:22px;columns:2;column-gap:30px;}
+  @media(max-width:640px){.lovelist ol{columns:1;}}
+  .lovelist li{font-size:13.5px;color:#8A4450;padding:3px 0;}
+  footer{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);}
+  .flash{animation:flash 1.6s ease;}
+  @keyframes flash{0%,60%{box-shadow:0 0 0 6px rgba(255,122,110,.55);}100%{box-shadow:0 0 0 0 rgba(255,122,110,0);}}
 </style>
 </head>
 <body>
-<header>
-  <div class="hd-top">
-    <h1>✈️ 苏州+南京 · 情侣旅行攻略<small>8/23-8/30 · 8天7晚</small></h1>
-    <div class="city-switch">
-      <button id="city-sz" class="on">📍 苏州</button>
-      <button id="city-nj">📍 南京</button>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="kicker">💑 鹿老弟 & 女朋友 · 情侣出行</span>
+    <h1>苏州南京双城攻略地图</h1>
+    <p class="sub">2026.8.23-8.30 · 8天7晚 · 宁波→苏州（2天）→南京（5天）→宁波 · 浪漫拍照 + 性价比优先</p>
+    <div class="chips">
+      <span class="chip">🧡 2人 · 情侣</span>
+      <span class="chip">🏯 苏州 2天</span>
+      <span class="chip">🏛️ 南京 5天</span>
+      <span class="chip">🌶️ 湘菜爱好者</span>
+      <span class="chip">☀️ 8月底防暑</span>
     </div>
-  </div>
-  <div class="hd-meta">
-    <span>👫 2人出行</span><span>💰 预算 ¥5,200-8,200</span><span>🚄 高铁往返</span><span>🏠 民宿+酒店</span><span>📅 点击日期看当天动线</span>
-  </div>
-  <nav id="dayTabs"></nav>
-</header>
-<div id="layout">
-  <aside id="side">
-    <div class="card">
-      <div id="dayTitle"></div>
-      <div id="daySub"></div>
-      <div id="routeList" class="route-list"></div>
+  </header>
+
+  <!-- ============ 实景地图 ============ -->
+  <section id="realmap-sec">
+    <h2 class="sec">🗺️ 实景地图 <small style="font-size:13px;color:var(--sub);font-weight:400;">（高德风格 · 可放大拖动 · 点按钮筛选天数）</small></h2>
+    <div class="dayfilters" id="dayfilters">
+      <button type="button" data-day="0" class="on">全部</button>
+      <button type="button" data-day="1">D1 苏州</button>
+      <button type="button" data-day="2">D2 苏州</button>
+      <button type="button" data-day="3">D3 南京</button>
+      <button type="button" data-day="4">D4 钟山</button>
+      <button type="button" data-day="5">D5 南博</button>
+      <button type="button" data-day="6">D6 玄武湖</button>
+      <button type="button" data-day="7">D7 动物园</button>
+      <button type="button" data-day="8">D8 返程</button>
     </div>
-    <div class="card book-box">
-      <b>📅 出发前预约清单（重要）</b>
-      <ul>
-        <li><b>8/19 18:00</b> 钟山风景区小程序约中山陵（提前7天）</li>
-        <li><b>8/20 18:00</b> 南京博物院小程序抢票（提前7天）</li>
-        <li><b>8/21 7:00</b> 约遇难同胞纪念馆（提前7天）</li>
-        <li><b>8/22</b> 苏州园林旅游公众号约拙政园</li>
-        <li><b>8/25 0:00</b> 约总统府（提前2天）</li>
-      </ul>
+    <div class="mapbox">
+      <div class="realmap" id="realmap"></div>
+      <p class="hint">💡 点地标看详情 · 点每日卡片标题 → 地图筛选当天 · 点卡片里地点名 → 地图定位该景点</p>
     </div>
-    <div class="card" id="card"></div>
-    <div class="card legend" id="legendBox"></div>
-  </aside>
-  <div id="map">
-    <svg id="svgMap" viewBox="0 0 1000 826" preserveAspectRatio="none">
-      <g id="world" class="world"></g>
-    </svg>
-    <div id="mapHint">🖱️ 拖动平移 · 滚轮缩放 · 点圆点看详情 · 绿点=起点 🚩=终点 · 编号=动线顺序</div>
-    <div id="zoomBox">
-      <button id="zin" title="放大">＋</button>
-      <button id="zout" title="缩小">－</button>
+  </section>
+
+
+  <!-- ============ 每日行程 ============ -->
+  <section>
+    <h2 class="sec">🗓️ 每日行程</h2>
+    <p style="font-size:13px;color:var(--sub);margin:-6px 0 12px;">✨ 紫色小标签 = 当天含"可选加站" · 🔥 蓝色板块 = 人流/预约提醒 · 📍 点时间表里的地点名 → 地图定位</p>
+    <div class="days">
+
+      <details class="day" id="day-1" open>
+        <summary>
+          <span class="daynum d1"><small>Day 1</small><big>8.23</big></span>
+          <span class="daytitle"><h3>🏯 宁波 → 苏州</h3><p>拙政园荷花 × 平江路夜游</p></span>
+          <span class="routeinfo">G7508 · 2h39m</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚄 今日导航：10:26 宁波站乘 G7508 → 13:05 苏州站（¥150-180/人）→ 地铁4号线转1号线约20分钟到平江路/观前街（¥4/人）· 当晚宿平江路/观前街</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">10:26-13:05</td><td class="l">🚄 宁波站 → 苏州站</td><td>G7508 首选车次（到市中心苏州站，不是苏州北站！）；地铁约20分钟到酒店</td></tr>
+              <tr><td class="t">13:30-14:30</td><td class="l">🏨 平江路/观前街周边民宿</td><td>入住放行李（性价比¥150-250 / 桔子·全季¥250-400）</td></tr>
+              <tr><td class="t">14:30-17:00</td><td class="l">📍 姑苏区·拙政园（¥80/人）</td><td>江南四大名园之首，满池荷花+汉服拍照绝佳。机位：倒影楼、卅六鸳鸯馆、借景北寺塔、小飞虹廊桥</td></tr>
+              <tr><td class="t">17:00-17:30</td><td class="l">📍 苏州博物馆外观（免费）</td><td>贝聿铭收官之作，光影水庭机位；今天来不及入馆，门口打卡</td></tr>
+              <tr><td class="t">17:30-19:30</td><td class="l">📍 姑苏区·平江路（免费）</td><td>白墙黛瓦、小桥流水、乌篷船；边逛边吃：哑巴生煎、潘玉麟桂花糖粥、鸡脚旮旯；可选汉服体验¥199-299（含妆造+跟拍）</td></tr>
+              <tr><td class="t">19:30-20:30</td><td class="l">🎵 平江路评弹茶馆</td><td>点壶碧螺春，听一段吴侬软语，人均30-50</td></tr>
+            </tbody>
+          </table>
+          <div class="grid2">
+            <div class="box"><h5>🍜 苏州必吃（附位置）</h5><ul>
+              <li>松鼠桂鱼 松鹤楼（观前街太监弄）¥150 苏帮菜头牌</li>
+              <li>响油鳝糊 得月楼 ¥120（上桌浇沸油）</li>
+              <li>哑巴生煎 临顿路温家岸12号 ¥20/8只（现点现煎）</li>
+              <li>桂花糖粥 潘玉麟（平江路）¥10-15</li>
+              <li>苏式汤面 苏虞斋/伟记奥面馆 ¥30-50</li>
+              <li>鸡头米糖水 8-9月时令限定，正好赶上！</li></ul></div>
+            <div class="box"><h5>🏨 住宿 · 机位</h5><ul>
+              <li>首选：平江路/观前街周边（步行可达拙政园、狮子林、苏博；地铁1/4号线；美食密集）</li>
+              <li>📸 拙政园荷塘+北寺塔借景（7:30开园/15:30后）、平江路傍晚灯笼亮起</li>
+              <li>👘 汉服租赁 ¥100-300（平江路/拙政园周边）</li></ul></div>
+          </div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">拙政园现场不售票！必须提前1-7天在"苏州园林旅游"公众号预约；暑期15:00后入园人少、光线柔；旺季建议早7:30第一批入园</li>
+            <li class="no">苏州博物馆需提前3-7天预约（周一闭馆，本次行程刻意避开）</li>
+            <li>平江路白天商业化较重，傍晚后才有氛围；钻两侧小巷（大儒巷/悬桥巷）人少出片</li>
+            <li class="no">古街低价汉服/游船隐形消费多，认准官方明码标价；喝茶先问价</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-2" open>
+        <summary>
+          <span class="daynum d2"><small>Day 2</small><big>8.24</big></span>
+          <span class="daytitle"><h3>💕 苏州园林 + 古寺 + 夜景</h3><p>爱情园林 × 寒山钟声 × 山塘夜景</p></span>
+          <span class="routeinfo">古城区 · 地铁+共享单车</span>
+          <span class="optbadge">✨ 含可选加站</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：全天苏州古城区（地铁1/4号线 + 共享单车最方便，古城区别自驾/打车）· 当晚仍宿平江路/观前街</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">7:30-8:00</td><td class="l">🥟 哑巴生煎早餐</td><td>临顿路温家岸12号（总店），现点现煎爆汁，人均15-20</td></tr>
+              <tr><td class="t">8:00-10:00</td><td class="l">📍 姑苏区·耦园（¥25/人）</td><td>"耦"通"偶"、佳偶天成，苏州最浪漫的爱情主题园林！吾爱亭拍情侣照、听橹楼看园景、东园临水；可坐手摇船；建议8点入园光线绝佳、人超少</td></tr>
+              <tr><td class="t">10:30-12:00</td><td class="l">📍 姑苏区·留园（¥55/人）</td><td>冠云峰为江南第一太湖石；比拙政园精致小巧、游客少更舒服</td></tr>
+              <tr><td class="t">12:00-13:00</td><td class="l">🍜 苏式面午餐</td><td>同得兴（十全街）/朱鸿兴（观前街）：枫镇大肉面（夏日限定，9:30前到）、焖肉面、爆鱼面，人均30-50</td></tr>
+              <tr><td class="t">13:30-16:30</td><td class="l">📍 寒山寺（¥20/人）+ 枫桥景区（免费）</td><td>"姑苏城外寒山寺"：黄墙红门前、钟楼、古树旁；枫桥：古桥+运河+铁铃关，傍晚拍运河古桥全景</td></tr>
+              <tr><td class="t">17:30-20:30</td><td class="l">📍 姑苏区·七里山塘（免费）</td><td>海棠糕/梅花糕/荣阳楼油氽团子逛吃；19:00亮灯后是江南夜景天花板：通贵桥（红灯笼映河面倒影）、新民桥（俯拍全景）；可选乘船夜游¥60-80/人</td></tr>
+            </tbody>
+          </table>
+          <div class="optbox"><h5>✨ 可选加站（时间充裕再加）</h5><ul>
+            <li>狮子林 ¥40：趣味假山王国，距苏博几分钟，可串联游览</li>
+            <li>西园寺 ¥5：本地人私藏清净秘境，猫咪多；素面限时8:00-15:00，去晚了吃不到</li>
+            <li>艺圃 ¥10：明代小园，延光阁是苏州园林中最大水榭，可喝茶发呆（人少景美）</li>
+            <li>葑门横街 / 双塔市集（免费）：买伴手礼去这！现炸小吃下午4:30后出摊，比景区主街便宜</li>
+            <li>网师园夜游 ¥120：周五六晚上，园林实景昆曲/评弹、灯光映园林</li></ul></div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li>耦园早7:30-9:00入园光线最佳、人最少（7:30开园）</li>
+            <li class="hot">山塘街白天冷冷清清，一定要傍晚后去才有灯火阑珊的感觉；亮灯约19:00，蓝调17:00-20:00最美</li>
+            <li>松鹤楼/得月楼建议提前2天电话订位；同得兴枫镇大肉面每日限量，9:30前到</li>
+            <li class="no">避开门口拉客的"松鼠桂鱼+东坡肉"混搭山寨店；周庄太商业化不推荐（同里更温和）</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-3" open>
+        <summary>
+          <span class="daynum d3"><small>Day 3</small><big>8.25</big></span>
+          <span class="daytitle"><h3>🏛️ 苏州 → 南京</h3><p>虎丘斜塔 × 秦淮夜游</p></span>
+          <span class="routeinfo">高铁44分钟 · 车次密集</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚄 今日导航：8:00 虎丘 → 11:00 苏州站/北站高铁 → 12:00 南京（44分钟-1.5h，¥40-130/人）→ 入住新街口/夫子庙 · 当晚宿南京</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">7:30-8:00</td><td class="l">🥟 酒店附近苏式面馆早餐</td><td>人均15-20</td></tr>
+              <tr><td class="t">8:00-10:00</td><td class="l">📍 姑苏区·虎丘（¥70/人）</td><td>"到苏州不游虎丘乃憾事也"：塔影桥拍虎丘塔倒影（9:00前最佳）、剑池、千人石；世界第二斜塔</td></tr>
+              <tr><td class="t">11:00-12:00</td><td class="l">🚄 苏州 → 南京</td><td>高铁像公交车一样密集，10-20分钟一班，随到随走；12:00 到南京入住放行李</td></tr>
+              <tr><td class="t">13:00-14:00</td><td class="l">🍜 午餐</td><td>鸭血粉丝汤 + 牛肉锅贴，人均30-40</td></tr>
+              <tr><td class="t">14:30-17:00</td><td class="l">📍 秦淮区·老门东（免费）</td><td>青砖黛瓦老城巷：先锋书店（骏惠书屋）、文艺小巷；边逛边吃：蒋有记锅贴、陆氏梅花糕、小郑酥烧饼</td></tr>
+              <tr><td class="t">18:00-19:30</td><td class="l">🍜 南京大牌档晚餐</td><td>美龄粥、盐水鸭、天王烤鸭包、桂花糖芋苗，人均60-80（想更实惠去社区老店）</td></tr>
+              <tr><td class="t">19:30-21:00</td><td class="l">🚢 秦淮河夜游（¥120/人夜间）</td><td>金陵夜景精髓，乘画舫泛舟；文德桥拍秦淮河全景（C位机位）；亮灯18:00-22:30，蓝调18:30-19:00；可选《长乐未央》汉服舞蹈免费观看</td></tr>
+            </tbody>
+          </table>
+          <div class="grid2">
+            <div class="box"><h5>🍜 南京必吃（附位置）</h5><ul>
+              <li>鸭血粉丝汤 蒋有记/回味/鸭得坊 ¥15-20（南京灵魂）</li>
+              <li>盐水鸭 韩复兴（老字号）/章云板鸭 ¥30-50/半只</li>
+              <li>皮肚面 项记/祁家面馆 ¥15-25 · 牛肉锅贴 ¥12-15/两</li>
+              <li>梅花糕 陆氏（老门东）¥8-10 · 鸭油酥烧饼 小郑 ¥5-8</li>
+              <li>糖芋苗 蓝老大 ¥10-15 · 鸡汁汤包 鸡鸣汤包 ¥20-30</li></ul></div>
+            <div class="box"><h5>🏨 住宿（南京5晚）</h5><ul>
+              <li>首选：新街口（地铁1/2号线交汇，去任何景点≤30分钟；比夫子庙便宜1/3）</li>
+              <li>经济：木鸟民宿夫子庙古韵双人居 ¥160-180（搜9648582）/ 桔子·汉庭 ¥180-260</li>
+              <li>氛围：夜泊秦淮君亭（秦淮书舍）¥300-400，露台看秦淮河</li>
+              <li>浪漫：洄游民宿（玄武湖中央路）¥300-500，32楼看日出玄武湖+紫金山同框</li>
+              <li>建议：前2晚新街口 + 后3晚夫子庙/老门东体验夜景</li></ul></div>
+          </div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">夫子庙主街小吃又贵又难吃：优先老门东、三山街、科巷；景区门口黑车/低价一日游坚决不坐不报</li>
+            <li>秦淮河晚上去才美，白天很普通；蓝调时刻18:30-19:00最出片</li>
+            <li class="no">虎丘塔影桥倒影9:00前最佳；苏州→南京高铁选13:00前出发，上午多玩虎丘</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-4" open>
+        <summary>
+          <span class="daynum d4"><small>Day 4</small><big>8.26</big></span>
+          <span class="daytitle"><h3>🌳 钟山风景区一日</h3><p>中山陵 × 音乐台白鸽 × 明孝陵神道</p></span>
+          <span class="routeinfo">地铁2号线 · 观光车接驳</span>
+          <span class="optbadge">✨ 含可选加站</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：全天钟山风景区（地铁2号线苜蓿园/下马坊站；景区观光车单次¥10/不限次¥50；别自驾，停车难+堵车）· 晚上回市区</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">7:30-8:00</td><td class="l">🥟 芳婆糕团店早餐（新街口）</td><td>乌饭团+糖芋苗，人均10-15</td></tr>
+              <tr><td class="t">8:30-10:30</td><td class="l">📍 玄武区·中山陵（免费，需预约）</td><td>392级台阶登顶俯瞰金陵；博爱坊、陵门、祭堂；8:30开门早到人少</td></tr>
+              <tr><td class="t">10:30-11:30</td><td class="l">🕊️ 音乐台（¥10/人）</td><td>喂白鸽超级出片：白鸽+梧桐+光影，情侣必拍（10:00前最佳）</td></tr>
+              <tr><td class="t">11:30-12:30</td><td class="l">🍜 午餐</td><td>景区内灵谷寺素面（人均25）或出景区吃</td></tr>
+              <tr><td class="t">13:00-15:00</td><td class="l">📍 明孝陵（¥70/人，联票¥100）</td><td>世界文化遗产：神道石象路两侧石兽+梧桐；从3号门进先看鹿再走神道</td></tr>
+              <tr><td class="t">15:00-16:00</td><td class="l">📍 美龄宫（¥30/人）</td><td>"远东第一别墅"，从空中看像一条项链；外部拍照+内部参观</td></tr>
+              <tr><td class="t">16:00-17:00</td><td class="l">📍 梧桐大道（免费）</td><td>南京最美林荫路，傍晚光线最柔，拍情侣剪影</td></tr>
+              <tr><td class="t">17:30-20:30</td><td class="l">🍜 晚餐 + 1912街区（免费）</td><td>科巷/明瓦廊晚餐（皮肚面·项记面馆、鸭油酥烧饼）；1912酒吧街+民国建筑小酌，人均50-80</td></tr>
+            </tbody>
+          </table>
+          <div class="optbox"><h5>✨ 可选加站（钟山宝藏）</h5><ul>
+            <li>灵谷寺：无梁殿+灵谷塔360°俯瞰，松风阁素面人气高</li>
+            <li>流徽榭（免费）：紫金山深处三面临湖，盛夏睡莲满塘、人少如画</li>
+            <li>钟山体育公园（免费）：超大草坪+民国中央体育场复古拱门，日落剪影绝美</li>
+            <li>💰 省钱：钟山联票¥100（含明孝陵+美龄宫+音乐台+灵谷寺，单买¥145）；6:30前入园所有景点免费</li></ul></div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">中山陵：微信"钟山风景区"小程序提前7天预约，每日18:00放票，节假日很紧张；8:30开门早到人少</li>
+            <li class="no">明孝陵/音乐台等提前1天预约（每日7:30放票）；中高考生凭准考证钟山免费至2026年9月底</li>
+            <li>景区占地极大，预留完整1天；观光车单次¥10/不限次¥50</li>
+            <li class="no">只去中山陵太亏！联票¥100超值；钟山风景区蚊虫多，带驱蚊水</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-5" open>
+        <summary>
+          <span class="daynum d5"><small>Day 5</small><big>8.27</big></span>
+          <span class="daytitle"><h3>📚 南博 + 总统府</h3><p>镇馆金兽 × 民国穿越 × 湘菜之夜</p></span>
+          <span class="routeinfo">地铁直达 · 室内避暑</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：全天南京市区，地铁直达（南博站/总统府站）· 中午 11:00-14:00 最热时段安排室内（南博有空调，避暑圣地！）</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">8:00-8:30</td><td class="l">🥟 李记清真馆早餐（七家湾）</td><td>牛肉锅贴+馄饨，人均15</td></tr>
+              <tr><td class="t">9:00-12:30</td><td class="l">📍 南京博物院（免费，需预约）</td><td>中国三大博物馆之一，至少留大半天：历史馆镇院之宝"金兽"、民国馆沉浸式穿越（拍照超出片）；9:00-17:00（16:00停止入馆）；室内空调避暑</td></tr>
+              <tr><td class="t">12:30-13:30</td><td class="l">🍜 科巷菜场午餐</td><td>草鸡蛋蛋糕、老米记酒酿、各种小吃，人均20-30</td></tr>
+              <tr><td class="t">14:00-16:30</td><td class="l">📍 总统府（¥35/人）</td><td>600年风云史：西花园、子超楼、大门门楼；旺季8:30-18:00（17:00停止入馆）</td></tr>
+              <tr><td class="t">16:30-18:30</td><td class="l">📍 可选：六朝博物馆（¥30/人）+ 长江路漫步</td><td>六朝博物馆光影美学超出片，情侣拍照圣地；长江路民国风情一条街，梧桐+老建筑</td></tr>
+              <tr><td class="t">19:00-20:30</td><td class="l">🌶️ 湘菜晚餐（鹿老弟最爱！）</td><td>湘当笨：招牌小炒黄牛肉超级下饭，人均60-80；其他：寻味江南·湖南菜、辣不怕湘菜馆</td></tr>
+              <tr><td class="t">20:30-21:30</td><td class="l">📍 德基广场打卡（免费）</td><td>造价千万的豪华洗手间：2F迪拜黑金宫殿、3F赛博朋克、5F波普眩晕</td></tr>
+            </tbody>
+          </table>
+          <div class="grid2">
+            <div class="box"><h5>🍜 湘菜/南京菜（鹿老弟专属）</h5><ul>
+              <li>湘当笨：小炒黄牛肉、剁椒鱼头，人均60-80</li>
+              <li>费大厨辣椒炒肉（德基/新街口）¥70-90 · 望湘园鸳鸯鱼头王 ¥80-100</li>
+              <li>南京大牌档：美龄粥/盐水鸭/烤鸭包 ¥60-80（社区老店更正宗实惠）</li></ul></div>
+            <div class="box"><h5>🏨 住宿 · 避坑</h5><ul>
+              <li>住新街口（地铁1/2号线交汇）最方便；夫子庙氛围好但主街吃饭溢价</li>
+              <li>⚠️ 新街口地下通道像迷宫，看好出口编号再走</li>
+              <li>⚠️ 景区门口"免费拍照""低价一日游"全是坑，别理</li></ul></div>
+          </div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">南京博物院：微信"南京博物院"小程序提前7天预约，每日18:00放票，极难抢！设闹钟；分上午/下午时段按预约入馆；务必带身份证原件</li>
+            <li class="no">总统府：微信"南京总统府"小程序提前2天预约（每日00:00放票，较宽松）</li>
+            <li>7-8月南京是"火炉"：中午躲进南博/商场，吃饭选有空调的</li>
+            <li class="no">网红餐厅排队久，找门口排本地人长队的苍蝇馆子更对味</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-6" open>
+        <summary>
+          <span class="daynum d6"><small>Day 6</small><big>8.28</big></span>
+          <span class="daytitle"><h3>🕊️ 纪念馆 + 颐和路 + 玄武湖</h3><p>铭记历史 × 梧桐公馆 × 金陵日落</p></span>
+          <span class="routeinfo">地铁直达 · 傍晚户外</span>
+          <span class="optbadge">✨ 含可选加站</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：全天南京市区，地铁直达 · 上午纪念馆（肃穆），午后颐和路/鸡鸣寺，傍晚玄武湖看日落 · 当晚仍宿南京</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">8:30-11:30</td><td class="l">📍 建邺区·遇难同胞纪念馆（免费，需预约）</td><td>来南京最重要的一课：8:30-17:30（周一闭馆）；门口免费领白菊，馆内3处可献花；展厅内禁止拍照，心怀敬畏</td></tr>
+              <tr><td class="t">13:00-15:00</td><td class="l">📍 鼓楼区·颐和路（免费）</td><td>"万国建筑博物馆"：285栋民国公馆，梧桐树下+老洋房随手拍大片；午后3-5点光线最佳</td></tr>
+              <tr><td class="t">15:30-17:30</td><td class="l">📍 玄武区·鸡鸣寺（¥10/人）</td><td>南京最古老的寺庙，求姻缘灵验（情侣必来！）；药师佛塔、拱门、城墙；南门进北门出单向通行</td></tr>
+              <tr><td class="t">17:30-19:00</td><td class="l">📍 玄武湖（免费）</td><td>解放门看鸡鸣寺+玄武湖同框；傍晚看日落+城市天际线；"别有洞天"石缝框景（小红书刷屏）；可租脚踏船¥120/h</td></tr>
+              <tr><td class="t">19:00-20:30</td><td class="l">🍜 晚餐</td><td>金哥私房菜（珠江路）：鸡汁小馄饨+招牌麻鸭，人均60</td></tr>
+              <tr><td class="t">20:30-21:30</td><td class="l">🏮 熙南里夜游（免费）</td><td>"灯火天街"：青砖古巷+花灯+非遗手作+文创摊位+小酒馆，氛围感拉满</td></tr>
+            </tbody>
+          </table>
+          <div class="optbox"><h5>✨ 可选浪漫加餐</h5><ul>
+            <li>中山码头1元轮渡：南京最便宜的浪漫——长江日落+江风（傍晚去）</li>
+            <li>浦云路"心形桥"：桥体曲线如心形，日落约18:00最浪漫</li>
+            <li>玄武湖3D水幕电影《寻脉玄武湖》+AI纱幕投影（2026夏上新）</li>
+            <li>金陵STYLE浪漫中心：玄武湖畔最美婚姻登记处"执手亭"（情侣打卡）</li></ul></div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">纪念馆：微信"侵华日军南京大屠杀遇难同胞纪念馆"公众号提前7天预约，每日7:00放票；务必带身份证原件</li>
+            <li>颐和路午后3-5点光线最佳、出片率极高；傍晚落日斜照梧桐更美</li>
+            <li class="no">玄武湖"别有洞天"日落时段人不少，提前占位；钟毓桥"金光穿孔"也是刷屏机位</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-7" open>
+        <summary>
+          <span class="daynum d7"><small>Day 7</small><big>8.29</big></span>
+          <span class="daytitle"><h3>🐼 红山动物园 + 购物</h3><p>欢乐收尾 × 买买买 × 告别湘菜</p></span>
+          <span class="routeinfo">地铁1号线 · 市区</span>
+          <span class="optbadge">✨ 含可选加站</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚗 今日导航：方案A 红山动物园（地铁1号线，一早入园）→ 科巷采购 → 新街口购物 → 告别湘菜 → 夜市 · 当晚仍宿南京</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">8:30-12:00</td><td class="l">📍 红山动物园（¥70/人）</td><td>全国顶流网红动物园，没有动物表演；一早入园动物最活跃；优先坐观光车到河马馆，从上往下逛</td></tr>
+              <tr><td class="t">12:00-13:00</td><td class="l">🍜 午餐</td><td>动物园附近或回市区，人均30-40</td></tr>
+              <tr><td class="t">13:30-15:30</td><td class="l">📍 科巷采购</td><td>南京最火美食街+特产：盐水鸭（韩复兴老字号）、鸭油酥烧饼、糕点伴手礼，人均50-80</td></tr>
+              <tr><td class="t">16:00-18:00</td><td class="l">📍 新街口商圈</td><td>德基广场、中央商场、金鹰自由购物</td></tr>
+              <tr><td class="t">18:00-19:30</td><td class="l">🌶️ 告别湘菜</td><td>湘当笨 或 费大厨辣椒炒肉，人均70-80</td></tr>
+              <tr><td class="t">19:30-21:00</td><td class="l">🌃 明瓦廊 / 三牌楼夜市</td><td>最后的南京夜晚：柏楠烧烤、啵啵鱼，人均50</td></tr>
+            </tbody>
+          </table>
+          <div class="optbox"><h5>✨ 可选方案B：牛首山（震撼体验，门票较贵）</h5><ul>
+            <li>¥160/人 + 观光车¥20（必买，不然走到腿断）</li>
+            <li>40亿打造的佛顶宫，全世界仅存佛顶骨舍利；地宫超级震撼</li>
+            <li>路线：东入口→佛顶前苑→佛顶寺→观光车→佛顶宫→佛顶塔；市区地铁+公交约1小时</li>
+            <li>适合把动物园换成"震撼系"体验的情侣；二选一即可</li></ul></div>
+          <div class="crowd"><h5>⏰ 人流与预约提醒</h5><ul>
+            <li class="hot">红山动物园建议一早入园（动物最活跃）；周末人多，观光车先到河马馆</li>
+            <li>盐水鸭去居民区老字号（韩复兴），别买景区门口"10元半只"和真空包装</li>
+            <li class="no">新街口地下通道看出口编号，避免迷路</li>
+            <li>伴手礼（雨花茶/糕团/盐水鸭）在新街口/科巷一站买齐</li></ul></div>
+        </div>
+      </details>
+
+      <details class="day" id="day-8" open>
+        <summary>
+          <span class="daynum d8"><small>Day 8</small><big>8.30</big></span>
+          <span class="daytitle"><h3>🚄 自由活动 + 返程</h3><p>最后半天逛逛逛 → 高铁回家</p></span>
+          <span class="routeinfo">G7613 · 17:47→20:21</span>
+        </summary>
+        <div class="body">
+          <div class="drive">🚄 今日导航：上午自由活动 → 12:00 退房 → 下午采购 → 16:30 地铁到南京南站 → 17:47 G7613 → 20:21 宁波（¥208/人）</div>
+          <table class="timeline">
+            <thead><tr><th>时间</th><th>地点</th><th>做什么</th></tr></thead>
+            <tbody>
+              <tr><td class="t">8:00-9:00</td><td class="l">🥟 芳婆糕团店最后早餐</td><td>乌饭团+糖芋苗，人均10</td></tr>
+              <tr><td class="t">9:00-11:00</td><td class="l">📍 自由活动（三选一）</td><td>台城城墙（免费俯瞰玄武湖，傍晚日落绝美）/ 老门东、颐和路补拍 / 睡到自然醒酒店附近逛逛</td></tr>
+              <tr><td class="t">11:00-13:00</td><td class="l">🍜 午餐 + 退房</td><td>随便吃点，收拾行李</td></tr>
+              <tr><td class="t">13:00-16:00</td><td class="l">🛍️ 最后采购</td><td>伴手礼：盐水鸭、糕团、雨花茶</td></tr>
+              <tr><td class="t">16:30-20:21</td><td class="l">🚄 南京南站 → 宁波</td><td>地铁约30分钟到南京南；G7613 17:47 发车，20:21 到宁波，回家！</td></tr>
+            </tbody>
+          </table>
+          <div class="warn"><b>返程车次：</b>G7613 南京南 17:47 → 宁波 20:21（¥208/人，首选，白天还能玩半天）；太晚的车次不推荐。</div>
+        </div>
+      </details>
+
     </div>
-    <button id="fitBtn">⤢ 复位视野</button>
-    <div id="popup"></div>
-  </div>
+  </section>
+
+  <!-- ============ 情侣必做 ============ -->
+  <section>
+    <h2 class="sec">💞 情侣必做 10 件事</h2>
+    <div class="lovelist">
+      <ol>
+        <li>耦园吾爱亭拍情侣照（"佳偶天成"）</li>
+        <li>平江路汉服古风照 + 听评弹</li>
+        <li>金鸡湖"苏州之眼"摩天轮看日落（可选加餐）</li>
+        <li>山塘街通贵桥红灯笼夜景</li>
+        <li>音乐台喂白鸽（梧桐光影）</li>
+        <li>明孝陵石象路牵手走神道</li>
+        <li>梧桐大道拍情侣剪影</li>
+        <li>玄武湖"别有洞天"看日落</li>
+        <li>中山码头1元轮渡追长江日落（可选加餐）</li>
+        <li>秦淮河画舫夜游（文德桥全景）</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ 预算 ============ -->
+  <section>
+    <h2 class="sec">💰 预算参考（2人 · 8天7晚）</h2>
+    <div class="budget">
+      <div class="bcard"><h4>🚄 高铁</h4><p>宁波→苏州→南京→宁波<br><b>¥1,000-1,200</b></p></div>
+      <div class="bcard"><h4>🏨 住宿（7晚）</h4><p>经济型 ¥1,400<br>品质型 ¥2,800<br>（前2晚新街口+后3晚夫子庙体验秦淮夜景）</p></div>
+      <div class="bcard"><h4>🎫 门票</h4><p>苏州 ¥250 + 南京 ¥550-750<br><b>合计 ¥800-1,000</b><br>钟山联票¥100 超值省钱</p></div>
+      <div class="bcard"><h4>🍜 餐饮（8天）</h4><p>人均¥100-150/天<br><b>合计 ¥1,600-2,400</b></p></div>
+      <div class="bcard"><h4>🚇 市内交通 + 🛍️ 购物</h4><p>交通 ¥200-300<br>购物/伴手礼 ¥200-500</p></div>
+      <div class="bcard" style="background:#FFF0EC;border-color:#FFD4CB;"><h4>🎯 合计</h4><p><b>¥5,200-8,200</b><br>人均 ¥2,600-4,100<br><small style="color:#9B8570">（很多景点免费：平江路/山塘街/老门东/颐和路/玄武湖/中山陵等）</small></p></div>
+    </div>
+  </section>
+
+  <!-- ============ 行前必看 ============ -->
+  <section>
+    <h2 class="sec">📋 行前必看（两版合并）</h2>
+    <div class="tips">
+      <div class="tcard"><h4>🔥 预约清单（最重要！）</h4><ul>
+        <li class="hot">南京博物院：提前7天，每日18:00放票，极难抢！设闹钟</li>
+        <li class="hot">中山陵：提前7天，每日18:00放票（"钟山风景区"小程序）</li>
+        <li class="hot">遇难同胞纪念馆：提前7天，每日7:00放票</li>
+        <li>拙政园/耦园/留园/虎丘："苏州园林旅游"提前1-7天</li>
+        <li>总统府：提前2天（每日00:00）；明孝陵等提前1天（7:30）</li>
+        <li>时间线：8/16抢三馆 → 8/17抢园林 → 8/23约总统府；全部需身份证原件</li></ul></div>
+      <div class="tcard"><h4>☀️ 8月底防暑（极重要）</h4><ul>
+        <li>南京8月底26-33℃、体感35-40℃，中暑指数"极易发"</li>
+        <li>错峰：早6:30-8:30 / 晚18:30后是户外黄金时间</li>
+        <li>中午11:00-14:00安排室内（南博/商场/书店）</li>
+        <li>防晒伞+SPF30+（每2小时补）+藿香正气水+多喝水</li>
+        <li>午后多雷阵雨，带折叠伞（遮阳+防雨）</li></ul></div>
+      <div class="tcard"><h4>🚄 交通指南</h4><ul>
+        <li>宁波→苏州选 G7508 到苏州站（市中心），不是苏州北站</li>
+        <li>苏州→南京高铁10-20分钟一班，随到随走</li>
+        <li>南京→宁波选 G7613（17:47→20:21）</li>
+        <li>苏州古城区：地铁+共享单车最优解，别自驾/打车</li>
+        <li>南京"与宁同行"刷码乘车；钟山观光车单次10/不限次50</li></ul></div>
+      <div class="tcard"><h4>🚫 避雷指南</h4><ul>
+        <li>景区拉客/"免费拍照"/低价一日游/黑车——不理不坐</li>
+        <li>夫子庙主街吃饭溢价严重，去老门东/科巷/三山街</li>
+        <li>盐水鸭去韩复兴，别买景区真空包装</li>
+        <li>钟山只去中山陵太亏；红星基地"小洱海"需晴天、降低预期</li>
+        <li>古街汉服/游船先问清全部费用；伴手礼去葑门横街/双塔市集</li></ul></div>
+      <div class="tcard"><h4>💰 省钱贴士</h4><ul>
+        <li>钟山联票¥100（单买¥145）；6:30前钟山所有景点免费进园</li>
+        <li>中高考生凭准考证：钟山风景区免费至2026年9月底</li>
+        <li>南博/中山陵/纪念馆/玄武湖/颐和路/平江路/山塘街全免费（要预约的记得约）</li>
+        <li>吃饭避开景区主街，去社区老店；住宿新街口比夫子庙核心便宜1/3</li></ul></div>
+      <div class="tcard"><h4>👫 穿搭建议</h4><ul>
+        <li>浅色古风/新中式最出片，适配所有园林和古街</li>
+        <li>带一套汉服（园林拍照超出片）；汉服店也可租¥100-300</li>
+        <li>最舒服的运动鞋/帆布鞋（拒绝带跟），透气平底鞋</li>
+        <li>晚上薄外套（空调房/河边风凉）；驱蚊水必备</li></ul></div>
+    </div>
+  </section>
+
+  <footer>
+    🗺️ 苏州南京双城攻略地图 · 由《双城攻略v2》×《抖音小红书热门汇总》融合制作（2026-08-22）<br>
+    数据来源：苏州本地宝、南京本地宝、景区官方公众号、携程/马蜂窝/小红书/抖音 ｜ 建议出发前再次确认官方预约与票价
+  </footer>
 </div>
+
 <script>
-'use strict';
-var CATS={spot:{label:'景点',color:'#3b82f6',icon:'🏛️'},food:{label:'美食',color:'#f59e0b',icon:'🍜'},photo:{label:'拍照机位',color:'#ec4899',icon:'📸'},avoid:{label:'避雷/坑点',color:'#ef4444',icon:'⚠️'},hotel:{label:'住宿',color:'#8b5cf6',icon:'🛏️'},transit:{label:'交通',color:'#0ea5a4',icon:'🚄'}};
-var DAYMETA={
-  nj:{3:{label:'8/25 周二·秦淮夜色',color:'#ef4444'},4:{label:'8/26 周三·钟山一日',color:'#f59e0b'},5:{label:'8/27 周四·文博历史',color:'#10b981'},6:{label:'8/28 周五·铭记+民国',color:'#3b82f6'},7:{label:'8/29 周六·休闲购物',color:'#8b5cf6'},8:{label:'8/30 周日·返程',color:'#ec4899'}},
-  sz:{1:{label:'8/23 周日·园林+夜游',color:'#06b6d4'},2:{label:'8/24 周一·耦园+山塘',color:'#f97316'}}
-};
-var NJDAYS=[3,4,5,6,7,8], SZDAYS=[1,2];
-var POIS=[
-{id:'nj-t1',city:'nj',cat:'transit',day:[3,8],name:'南京站/南京南站',lat:32.0900,lng:118.7993,
- rows:[['到达方式','苏州→南京高铁10-20分钟一班，随到随走'],['车次','G7180类 苏州北→南京南 最快44分钟 ¥40-130；G7018类 苏州站→南京站 约1h20m ¥100-166']],
- note:'建议选13:00-15:00车次，上午还能在苏州逛个虎丘。'},
-{id:'nj-t2',city:'nj',cat:'transit',day:[8],name:'南京南站',lat:31.9680,lng:118.7980,
- rows:[['返程首选','G7613 17:47→宁波 20:21 约2h34m ¥208/人'],['备选','G7520 20:35发 ¥343，太晚不推荐']],
- note:'选17:00-18:00车次，白天还能玩半天；地铁约30分钟到站。'},
-{id:'nj-t3',city:'nj',cat:'transit',day:[4],name:'地铁2号线·苜蓿园/下马坊',lat:32.0300,lng:118.8430,
- rows:[['进山方式','地铁2号线苜蓿园站/下马坊站 → 景区观光车'],['观光车','单次¥10-20/次，不限次¥50']],
- warn:'钟山风景区别自驾！停车难+堵车。'},
-{id:'nj-h1',city:'nj',cat:'hotel',day:null,name:'新街口住宿圈',lat:32.0415,lng:118.7787,
- rows:[['推荐','全季/亚朵（新街口店）¥250-350，隔音好床垫舒适'],['优势','地铁1/2号线交汇，去任何景点≤30分钟，比夫子庙便宜约1/3']],
- note:'推荐前2晚住新街口，方便跑各景点。'},
-{id:'nj-h2',city:'nj',cat:'hotel',day:null,name:'夫子庙住宿圈',lat:32.0203,lng:118.7885,
- rows:[['极致性价比','木鸟民宿·古韵双人居 ¥160-180（42㎡新中式，人均80-90，木鸟APP搜9648582）'],['经济连锁','桔子酒店（夫子庙地铁站）/汉庭 ¥180-260']],
- note:'后3晚可换到这里，体验秦淮夜景氛围。'},
-{id:'nj-h3',city:'nj',cat:'hotel',day:null,name:'夜泊秦淮君亭酒店（秦淮书舍）',lat:32.0215,lng:118.7890,
- rows:[['价格','¥300-400/晚'],['亮点','⭐9.7分书主题，送咖啡+面膜+饮品，露台看秦淮河']]},
-{id:'nj-h4',city:'nj',cat:'hotel',day:null,name:'洄游民宿（玄武湖中央路）',lat:32.0750,lng:118.7940,
- rows:[['价格','¥300-500/晚'],['亮点','32楼看日出，玄武湖+紫金山同框，情侣湖景首选']]},
-{id:'nj-d3-1',city:'nj',cat:'spot',day:[3],name:'老门东',lat:32.0154,lng:118.7878,
- rows:[['门票','免费'],['时间','14:30-17:00 逛吃约2.5小时'],['亮点','青砖黛瓦老城街巷+文创小店']],
- note:'边逛边吃：蒋有记锅贴、陆氏梅花糕、小郑酥烧饼、蓝老大糖芋苗；金陵墙（德云社附近）汉服出片，先锋书店骏惠书屋别错过。',
- warn:'夫子庙主街吃饭又贵又难吃，来老门东/三山街吃。'},
-{id:'nj-d3-2',city:'nj',cat:'spot',day:[3],name:'夫子庙·秦淮河',lat:32.0203,lng:118.7885,
- rows:[['门票','免费（游船另付）'],['亮灯','18:00-22:30，蓝调时刻18:30-19:00最出片'],['游船','夜游¥120/人，19:30-21:00最佳']],
- note:'文德桥是拍秦淮河全景的C位机位；往巷子里钻比主街有氛围。',
- warn:'白天去很普通，夜景才是精华！'},
-{id:'nj-d3-3',city:'nj',cat:'food',day:[3],name:'南京大牌档',lat:32.0210,lng:118.7870,
- rows:[['人均','¥60-80/人'],['必点','美龄粥、盐水鸭、天王烤鸭包、桂花糖芋苗']],
- warn:'景区版是游客价，本地人更爱社区老店。'},
-{id:'nj-d3-4',city:'nj',cat:'food',day:[3,5,7],name:'老门东美食群',lat:32.0156,lng:118.7874,
- rows:[['蒋有记','牛肉锅贴 ¥12-15/两，底部焦脆爆汁'],['陆氏梅花糕','¥8-10 现烤'],['小郑酥烧饼','¥5-8 酥脆掉渣'],['蓝老大','糖芋苗 ¥10-15']],
- note:'这几家挨着，下午逛老门东时一站式解决。'},
-{id:'nj-d4-1',city:'nj',cat:'spot',day:[4],name:'中山陵',lat:32.0610,lng:118.8455,
- rows:[['门票','免费（必须预约）'],['时间','8:30开门，早到人少'],['看点','392级台阶、博爱坊、陵门、祭堂']],
- note:'微信“钟山风景区”小程序提前7天预约，每日18:00放票，很紧张。',
- warn:'黄牛“免预约”是骗局；周一祭堂闭馆；台阶量力而行。'},
-{id:'nj-d4-2',city:'nj',cat:'photo',day:[4],name:'音乐台',lat:32.0589,lng:118.8446,
- rows:[['门票','¥10/人'],['机位','白鸽+梧桐+光影，上午10:00前最佳']],
- note:'喂白鸽超级出片，情侣必拍。'},
-{id:'nj-d4-3',city:'nj',cat:'spot',day:[4],name:'明孝陵',lat:32.0558,lng:118.8346,
- rows:[['门票','¥70/人（联票¥100含美龄宫+音乐台+灵谷寺）'],['看点','石象路神道600米，两侧石兽+梧桐'],['技巧','从3号门进，先看鹿再走神道']],
- note:'下午15:00后光线最佳，秋天是金色大道（这次是夏末，也美）。'},
-{id:'nj-d4-4',city:'nj',cat:'spot',day:[4],name:'美龄宫',lat:32.0520,lng:118.8330,
- rows:[['门票','¥30/人'],['看点','“远东第一别墅”，空中看是一条翡翠项链']],
- note:'外部拍照+内部参观，梧桐大道就在旁边。'},
-{id:'nj-d4-5',city:'nj',cat:'photo',day:[4],name:'梧桐大道',lat:32.0555,lng:118.8370,
- rows:[['门票','免费'],['机位','傍晚日落前1小时，拍情侣剪影']],
- note:'南京最美林荫路，傍晚光线最柔和。'},
-{id:'nj-d4-6',city:'nj',cat:'spot',day:[4],name:'灵谷寺',lat:32.0687,lng:118.8582,
- rows:[['门票','含在钟山联票内'],['看点','无梁殿+灵谷塔360°俯瞰']],
- note:'松风阁素面人均¥25，午餐在这里解决。'},
-{id:'nj-d4-7',city:'nj',cat:'photo',day:[4],name:'流徽榭',lat:32.0625,lng:118.8500,
- rows:[['门票','免费'],['看点','紫金山深处三面临湖，盛夏睡莲满塘']],
- note:'人少如画，纳凉拍照好去处（小红书热推小众点）。'},
-{id:'nj-d4-8',city:'nj',cat:'photo',day:[4],name:'钟山体育公园',lat:32.0640,lng:118.8610,
- rows:[['门票','免费'],['看点','超大草坪+民国中央体育场复古拱门']],
- note:'帐篷咖啡+日落剪影绝美。'},
-{id:'nj-d4-9',city:'nj',cat:'spot',day:[4],name:'1912街区',lat:32.0473,lng:118.7963,
- rows:[['门票','免费'],['氛围','酒吧街+民国建筑，南京夜生活地标']],
- note:'适合小酌一杯，人均¥50-80。'},
-{id:'nj-d4-10',city:'nj',cat:'food',day:[4,8],name:'芳婆糕团店',lat:32.0405,lng:118.7790,
- rows:[['人均','¥10-15'],['招牌','乌饭团+糖芋苗（新街口）']],
- note:'钟山日早餐和返程日早餐都推荐。'},
-{id:'nj-d4-11',city:'nj',cat:'food',day:[4,7],name:'明瓦廊美食街',lat:32.0390,lng:118.7805,
- rows:[['人均','¥30-50'],['推荐','皮肚面（项记面馆）、鸭油酥烧饼']],
- note:'新街口旁的老牌小吃街，避开景区主街。'},
-{id:'nj-d5-1',city:'nj',cat:'spot',day:[5],name:'南京博物院',lat:32.0430,lng:118.8250,
- rows:[['门票','免费（必须预约）'],['时间','9:00-17:00（16:00停止入馆），周一闭馆'],['必看','历史馆镇院之宝“金兽”、民国馆沉浸式穿越']],
- note:'微信“南京博物院”小程序提前7天预约，每日18:00放票，极难抢设闹钟！室内有空调，避暑圣地；民国馆拍照超出片。'},
-{id:'nj-d5-2',city:'nj',cat:'spot',day:[5],name:'总统府',lat:32.0470,lng:118.7955,
- rows:[['门票','¥35/人'],['时间','旺季8:30-18:00（17:00停止入馆），周一闭馆'],['看点','西花园、子超楼、大门门楼']],
- note:'微信“南京总统府”小程序提前2天预约（每日00:00放票），较宽松。'},
-{id:'nj-d5-3',city:'nj',cat:'spot',day:[5],name:'六朝博物馆',lat:32.0479,lng:118.7950,
- rows:[['门票','¥30/人（可选）'],['看点','光影美学超出片']],
- note:'情侣拍照圣地，就在总统府隔壁，时间够就进。'},
-{id:'nj-d5-4',city:'nj',cat:'photo',day:[5],name:'长江路',lat:32.0470,lng:118.7940,
- rows:[['门票','免费'],['看点','民国风情一条街，梧桐+老建筑']]},
-{id:'nj-d5-5',city:'nj',cat:'photo',day:[5],name:'德基广场',lat:32.0434,lng:118.7802,
- rows:[['门票','免费'],['看点','打卡造价千万的洗手间：2F迪拜黑金宫殿、3F赛博朋克、5F波普眩晕']]},
-{id:'nj-d5-6',city:'nj',cat:'food',day:[5,7],name:'科巷美食',lat:32.0387,lng:118.7890,
- rows:[['人均','¥20-30'],['推荐','草鸡蛋蛋糕、老米记酒酿、项记面馆皮肚面¥15-25、牛肉锅贴']],
- note:'南京最火美食街+特产采购地，购物也在这。'},
-{id:'nj-d5-7',city:'nj',cat:'food',day:[5],name:'李记清真馆（七家湾）',lat:32.0315,lng:118.7780,
- rows:[['人均','¥15'],['招牌','牛肉锅贴+馄饨']],
- note:'南博日早餐推荐。'},
-{id:'nj-d5-8',city:'nj',cat:'food',day:[5,7],name:'湘当笨·湘菜',lat:32.0425,lng:118.7815,
- rows:[['人均','¥60-80'],['招牌','小炒黄牛肉超级下饭']],
- note:'鹿老弟最爱的湘菜，南京告别晚餐也安排这家。'},
-{id:'nj-d6-1',city:'nj',cat:'spot',day:[6],name:'遇难同胞纪念馆',lat:32.0355,lng:118.7397,
- rows:[['门票','免费（必须预约）'],['时间','8:30-17:30，周一闭馆'],['提醒','门口免费领白菊，馆内3处可献花；展厅内禁止拍照']],
- note:'来南京最重要的一课，心怀敬畏。微信搜“侵华日军南京大屠杀遇难同胞纪念馆”公众号，提前7天预约，每日7:00/8:00放票。'},
-{id:'nj-d6-2',city:'nj',cat:'photo',day:[6],name:'颐和路',lat:32.0770,lng:118.7820,
- rows:[['门票','免费'],['看点','285栋民国公馆“万国建筑博物馆”'],['机位','梧桐树下+老洋房，傍晚落日斜照出片率爆表']]},
-{id:'nj-d6-3',city:'nj',cat:'spot',day:[6],name:'鸡鸣寺',lat:32.0615,lng:118.7996,
- rows:[['门票','¥10/人'],['看点','求姻缘灵验！药师佛塔、拱门、城墙'],['注意','南门只进、北门只出，单向通行']],
- note:'情侣求姻缘必来。'},
-{id:'nj-d6-4',city:'nj',cat:'photo',day:[6],name:'玄武湖',lat:32.0745,lng:118.7930,
- rows:[['门票','免费'],['机位','解放门看鸡鸣寺+玄武湖同框；“别有洞天”石缝框住城市天际线日落'],['玩法','可租脚踏船/电瓶船环湖 ¥120/h']],
- note:'傍晚看日落+城市天际线，小红书刷屏机位就是“别有洞天”。'},
-{id:'nj-d6-5',city:'nj',cat:'photo',day:[6],name:'先锋书店（玄武湖梁洲店）',lat:32.0715,lng:118.7975,
- rows:[['门票','免费'],['看点','湖心小岛上的书店，落地窗湖景+书香'],['时间','下午']]},
-{id:'nj-d6-6',city:'nj',cat:'photo',day:[6],name:'金陵STYLE浪漫中心',lat:32.0830,lng:118.7970,
- rows:[['门票','免费'],['看点','玄武湖畔白色“执手亭”，南京最美领证处'],['时间','全天']]},
-{id:'nj-d6-7',city:'nj',cat:'photo',day:[6],name:'玄武湖·情侣园',lat:32.0790,lng:118.8000,
- rows:[['门票','免费'],['看点','南京老牌浪漫约会地'],['时间','全天']]},
-{id:'nj-d6-8',city:'nj',cat:'spot',day:[6],name:'熙南里街区',lat:32.0260,lng:118.7810,
- rows:[['门票','免费'],['看点','“灯火天街”+非遗手作+青砖古巷+清吧'],['时间','19:00后夜景最佳']]},
-{id:'nj-d6-9',city:'nj',cat:'food',day:[6],name:'金哥私房菜（珠江路）',lat:32.0500,lng:118.7900,
- rows:[['人均','¥60'],['招牌','鸡汁小馄饨+招牌麻鸭']],
- note:'玄武湖/鼓楼附近晚餐推荐。'},
-{id:'nj-d7-1',city:'nj',cat:'spot',day:[7],name:'红山动物园',lat:32.0910,lng:118.8100,
- rows:[['门票','¥70/人'],['时间','建议一早入园，动物最活跃'],['亮点','全国顶流网红动物园，没有动物表演']],
- note:'优先坐观光车到河马馆，从上往下逛。'},
-{id:'nj-d7-2',city:'nj',cat:'spot',day:[7],name:'牛首山',lat:31.9460,lng:118.7350,
- rows:[['门票','¥160/人（观光车¥20必买）'],['时间','地铁+公交约1小时到'],['亮点','40亿打造佛顶宫，世界仅存佛顶骨舍利']],
- note:'路线：东入口→佛顶前苑→佛顶寺→观光车→佛顶宫→佛顶塔；地宫超级震撼。门票较贵但值得，二选一时考虑预算。'},
-{id:'nj-d7-3',city:'nj',cat:'spot',day:[7],name:'新街口商圈',lat:32.0415,lng:118.7787,
- rows:[['推荐','德基广场、中央商场、金鹰'],['提示','过马路走地下通道，看好出口编号不然会迷路']]},
-{id:'nj-d7-4',city:'nj',cat:'food',day:[7],name:'韩复兴·盐水鸭',lat:32.0620,lng:118.7740,
- rows:[['人均','¥30-50/半只'],['推荐','老字号，皮白肉嫩']],
- warn:'别买景区真空包装，去居民区老店买现切的。'},
-{id:'nj-d7-5',city:'nj',cat:'food',day:[7],name:'费大厨辣椒炒肉',lat:32.0418,lng:118.7798,
- rows:[['人均','¥70-80'],['招牌','辣椒炒肉']],
- note:'告别湘菜备选，和湘当笨二选一。'},
-{id:'nj-d7-6',city:'nj',cat:'food',day:[7],name:'三牌楼夜市/南湖',lat:32.0890,lng:118.7750,
- rows:[['人均','¥50-80'],['推荐','柏楠烧烤、啵啵鱼']],
- note:'最后夜晚夜宵好去处。'},
-{id:'nj-d8-1',city:'nj',cat:'photo',day:[8],name:'台城城墙',lat:32.0640,lng:118.7990,
- rows:[['门票','免费'],['看点','俯瞰玄武湖，日落绝美'],['时间','可选：返程日上午自由活动']]},
-{id:'nj-g1',city:'nj',cat:'photo',day:null,name:'中山码头1元轮渡',lat:32.0890,lng:118.7430,
- rows:[['门票','1元'],['看点','长江日落+江风，南京最便宜的浪漫'],['时间','傍晚']],
- note:'可顺路去达摩古洞（¥30，长江边“小莫高窟”）。'},
-{id:'nj-g2',city:'nj',cat:'spot',day:null,name:'达摩古洞',lat:32.1040,lng:118.7350,
- rows:[['门票','¥30/人'],['看点','长江边“小莫高窟”，石窟+江风+禅意']]},
-{id:'nj-g3',city:'nj',cat:'photo',day:null,name:'浦云路“心形桥”',lat:32.1450,lng:118.6550,
- rows:[['门票','免费'],['机位','桥体曲线如心形，日落约18:00'],['玩法','带蛋糕/气球拍情侣照']]},
-{id:'nj-g4',city:'nj',cat:'spot',day:null,name:'幕府山',lat:32.1180,lng:118.7700,
- rows:[['门票','免费'],['看点','夜登看长江夜景“星垂平野阔”']]},
-{id:'nj-g5',city:'nj',cat:'photo',day:null,name:'鱼嘴湿地公园',lat:32.0000,lng:118.6650,
- rows:[['门票','免费'],['机位','日落“橘子海”，夕阳下告白']]},
-{id:'nj-g6',city:'nj',cat:'photo',day:null,name:'百家湖1912街区',lat:31.9200,lng:118.8160,
- rows:[['门票','免费'],['看点','“江宁眼”摩天轮+后备箱市集+创意夜市'],['时间','晚上']]},
-{id:'nj-g7',city:'nj',cat:'spot',day:null,name:'红星基地',lat:31.9600,lng:118.8450,
- rows:[['门票','免费'],['看点','“小洱海”矿坑湖蓝色水面，需晴天']],
- warn:'滤镜照骗，实际是小矿坑湖，必须晴天+好角度，降低预期。'},
-{id:'nj-g8',city:'nj',cat:'spot',day:null,name:'金陵长乐坊（夫子庙）',lat:32.0190,lng:118.7890,
- rows:[['门票','免费'],['看点','《长乐未央》汉服舞者巡游互动']],
- note:'2026夏新上的表演，逛夫子庙时顺路看。'},
-{id:'nj-g9',city:'nj',cat:'food',day:null,name:'鸭血粉丝汤',lat:32.0410,lng:118.7810,
- rows:[['人均','¥15-20'],['推荐','蒋有记、回味、鸭得堡']],
- note:'南京灵魂早餐/午餐，街边老店随便挑。'},
-{id:'nj-g10',city:'nj',cat:'food',day:null,name:'鸡鸣汤包',lat:32.0420,lng:118.7820,
- rows:[['人均','¥20-30'],['招牌','鸡汁汤包，皮薄汁多']]},
-{id:'nj-a1',city:'nj',cat:'avoid',day:null,name:'避雷：夫子庙主街',lat:32.0205,lng:118.7895,
- rows:[['问题','白天去很普通；主街吃饭又贵又难吃'],['对策','晚上再去；吃饭去老门东/三山街附近']]},
-{id:'nj-a2',city:'nj',cat:'avoid',day:null,name:'避雷：钟山门口黑车',lat:32.0280,lng:118.8430,
- rows:[['问题','溢价绕路，低价一日游强制购物'],['对策','地铁+景区观光车，坚决不坐不报']]},
-{id:'nj-a3',city:'nj',cat:'avoid',day:null,name:'避雷：景区纪念品/真空盐水鸭',lat:32.0435,lng:118.7805,
- rows:[['问题','义乌小商品集散地；真空盐水鸭不正宗'],['对策','伴手礼网上买/去韩复兴现切']]},
-{id:'nj-a4',city:'nj',cat:'avoid',day:null,name:'避雷：中山陵黄牛“免预约”',lat:32.0620,lng:118.8440,
- rows:[['问题','黄牛“免预约”是骗局'],['对策','认准官方“钟山风景区”小程序预约']]},
-{id:'nj-a5',city:'nj',cat:'avoid',day:null,name:'避雷：紫金山自驾',lat:32.0400,lng:118.8200,
- rows:[['问题','车位紧张、停车费贵、易堵'],['对策','地铁2号线苜蓿园/下马坊站+观光车']]},
-{id:'nj-a6',city:'nj',cat:'avoid',day:null,name:'避雷：红星基地“看海”',lat:31.9600,lng:118.8430,
- rows:[['问题','滤镜照骗，实际是小矿坑湖'],['对策','必须晴天+好角度，降低预期']]},
-{id:'nj-a7',city:'nj',cat:'avoid',day:null,name:'避雷：龙都采石场',lat:32.0300,lng:118.8900,
- rows:[['问题','近期因安全已封闭'],['对策','别冒险爬高，看同类矿坑去红星基地']]}
-];
-var POIS_SZ=[
-{id:'sz-t1',city:'sz',cat:'transit',day:[1],name:'苏州站',lat:31.3310,lng:120.6080,
- rows:[['首选车次','G7508 10:26宁波→13:05苏州 ¥150-180/人'],['优势','苏州站紧邻古城，地铁4号线→1号线约20分钟到酒店']],
- warn:'高铁到苏州站，不是苏州北站！（苏州北站离市区远）'},
-{id:'sz-t2',city:'sz',cat:'transit',day:[1],name:'苏州北站',lat:31.4040,lng:120.6320,
- rows:[['说明','到站需换乘地铁40分钟+'],['备选车次','G7566/G1866 ¥171']]},
-{id:'sz-1',city:'sz',cat:'spot',day:[1],name:'拙政园',lat:31.3240,lng:120.6270,
- rows:[['门票','¥80/人'],['时间','暑期开放至17:30'],['看点','中国四大名园之首，夏季荷塘连片']],
- note:'必须提前1-7天在“苏州园林旅游”公众号预约，现场不售票！建议15:00后入园人少光线柔。',
- warn:'8月旺季人挤人，能7:30第一批入园最好。'},
-{id:'sz-2',city:'sz',cat:'spot',day:[1],name:'苏州博物馆（本馆）',lat:31.3245,lng:120.6260,
- rows:[['门票','免费（必须预约）'],['时间','周一闭馆（8/24不能去，已跳过）'],['看点','贝聿铭收官之作，光影水庭必拍机位']],
- note:'微信“苏州博物馆”小程序提前7天预约（工作日3-5天/周末节假7天）。'},
-{id:'sz-3',city:'sz',cat:'photo',day:[1],name:'平江路',lat:31.3150,lng:120.6320,
- rows:[['门票','免费'],['机位','沿河走廊、石桥、蔷薇小巷（大儒巷/悬桥巷人少出片）'],['时间','傍晚灯笼亮起最有氛围']],
- note:'边逛边吃：哑巴生煎¥20/8只、潘玉麟桂花糖粥¥10-15；找茶馆点碧螺春听评弹人均¥30-50。',
- warn:'白天商业化重，傍晚后去；喝茶先问价。'},
-{id:'sz-4',city:'sz',cat:'food',day:[1,2],name:'哑巴生煎（临顿路）',lat:31.3155,lng:120.6240,
- rows:[['人均','¥20/8只'],['提示','现点现煎爆汁，先点单后排；午间常年排队可14:00后去']]},
-{id:'sz-5',city:'sz',cat:'food',day:[1],name:'潘玉麟桂花糖粥',lat:31.3160,lng:120.6305,
- rows:[['人均','¥10-15'],['招牌','桂花糖粥/赤豆小圆子']]},
-{id:'sz-6',city:'sz',cat:'spot',day:[2],name:'耦园',lat:31.3165,lng:120.6385,
- rows:[['门票','¥25/人'],['时间','建议8:00入园，光线绝佳人超少'],['看点','“耦”通“偶”，苏州唯一爱情主题园林']],
- note:'情侣重点推荐！吾爱亭拍情侣照、听橹楼看园景、东园临水拍照，可坐手摇船。'},
-{id:'sz-7',city:'sz',cat:'spot',day:[2],name:'留园',lat:31.3185,lng:120.6020,
- rows:[['门票','¥55/人'],['看点','冠云峰为江南第一太湖石'],['提示','比拙政园精致小巧，游客少更舒服']]},
-{id:'sz-8',city:'sz',cat:'spot',day:[2],name:'寒山寺',lat:31.3095,lng:120.5700,
- rows:[['门票','¥20/人'],['看点','“姑苏城外寒山寺，夜半钟声到客船”'],['机位','黄墙红门前、钟楼、古树旁']],
- note:'下午16:00后进可避开旅行团。'},
-{id:'sz-9',city:'sz',cat:'photo',day:[2],name:'枫桥景区',lat:31.3100,lng:120.5690,
- rows:[['门票','免费'],['看点','古桥+运河+铁铃关'],['机位','傍晚拍运河古桥全景，氛围感拉满']]},
-{id:'sz-10',city:'sz',cat:'photo',day:[2],name:'山塘街夜景',lat:31.3180,lng:120.5960,
- rows:[['门票','免费'],['机位','通贵桥（红灯笼映河面倒影）、新民桥（俯拍全景）'],['时间','夏季约19:00亮灯，蓝调17:00-20:00最美']],
- note:'边逛边吃：海棠糕、梅花糕、荣阳楼油氽团子；可选乘船夜游¥60-80/人。',
- warn:'白天冷冷清清，一定要傍晚后去。'},
-{id:'sz-11',city:'sz',cat:'food',day:[2],name:'观前街·太监弄',lat:31.3105,lng:120.6230,
- rows:[['松鹤楼','松鼠桂鱼 ¥150（苏帮菜头牌，两人点一条够）'],['得月楼','响油鳝糊 ¥120，上桌浇沸油']],
- warn:'建议提前2天电话订位；避开门口拉客的“松鼠桂鱼+东坡肉”山寨店。'},
-{id:'sz-12',city:'sz',cat:'food',day:[2],name:'同得兴·苏式面',lat:31.3060,lng:120.6240,
- rows:[['人均','¥30-50'],['招牌','枫镇大肉面（夏日限定白汤面）、焖肉面、爆鱼面']],
- note:'十全街店枫镇大肉面每日限量，建议9:30前到。'},
-{id:'sz-13',city:'sz',cat:'food',day:null,name:'黄天源（观前街）',lat:31.3100,lng:120.6235,
- rows:[['人均','¥5-8'],['招牌','蟹壳黄咸味酥饼']]},
-{id:'sz-14',city:'sz',cat:'food',day:[2],name:'荣阳楼（山塘街北段）',lat:31.3185,lng:120.5950,
- rows:[['人均','¥30-40'],['招牌','油氽团子']]},
-{id:'sz-15',city:'sz',cat:'hotel',day:[1,2],name:'平江路/观前街住宿',lat:31.3180,lng:120.6260,
- rows:[['性价比','周边民宿 ¥150-250/晚（搜“平江路情侣大床房”）'],['品质','桔子酒店/全季（观前街店）¥250-400']],
- note:'步行可达拙政园、狮子林、苏博，地铁1/4号线覆盖。'},
-{id:'sz-16',city:'sz',cat:'spot',day:null,name:'西园寺',lat:31.3150,lng:120.5920,
- rows:[['门票','¥5'],['看点','本地人私藏清净秘境，猫咪多，素面限时8:00-15:00']],
- note:'时间富余可加，去晚了吃不到素面。'},
-{id:'sz-17',city:'sz',cat:'photo',day:null,name:'金鸡湖·苏州之眼',lat:31.3190,lng:120.6910,
- rows:[['门票','摩天轮约¥50'],['机位','17:00-19:00日落蓝调拍照']],
- warn:'50元坐10分钟性价比一般，但日落时段体验感好。'},
-{id:'sz-18',city:'sz',cat:'photo',day:null,name:'独墅湖一棵树',lat:31.2750,lng:120.7100,
- rows:[['门票','免费'],['看点','网红孤独树+大草坪，下午出片']]},
-{id:'sz-19',city:'sz',cat:'spot',day:null,name:'网师园夜游',lat:31.3060,lng:120.6260,
- rows:[['时间','周五六晚上'],['看点','园林实景昆曲/评弹，灯光映园林']]},
-{id:'sz-20',city:'sz',cat:'food',day:null,name:'双塔市集',lat:31.3105,lng:120.6290,
- rows:[['看点','设计师改造的网红菜市场，苏式美学+小吃']]},
-{id:'sz-21',city:'sz',cat:'food',day:null,name:'葑门横街',lat:31.3060,lng:120.6350,
- rows:[['看点','本地人菜市场老街，烟火气浓，现炸小吃16:30后出摊']],
- note:'买伴手礼/特产来这里，别在景区主街买。'}
-];
-var ROUTES={
- 'nj-3':['南京站/南京南站','老门东','夫子庙·秦淮河'],
- 'nj-4':['中山陵','音乐台','灵谷寺','明孝陵','美龄宫','梧桐大道','1912街区'],
- 'nj-5':['李记清真馆（七家湾）','南京博物院','科巷美食','总统府','六朝博物馆','长江路','湘当笨·湘菜','德基广场'],
- 'nj-6':['遇难同胞纪念馆','颐和路','鸡鸣寺','玄武湖','先锋书店（玄武湖梁洲店）','金哥私房菜（珠江路）','熙南里街区'],
- 'nj-7':['红山动物园','科巷美食','新街口商圈','三牌楼夜市/南湖'],
- 'nj-8':['芳婆糕团店','台城城墙','南京南站'],
- 'sz-1':['苏州站','拙政园','苏州博物馆（本馆）','平江路'],
- 'sz-2':['哑巴生煎（临顿路）','耦园','留园','同得兴·苏式面','寒山寺','枫桥景区','山塘街夜景']
-};
-var DAYCARDS={
-'nj-0':'<div class="cd">📋 南京5天总览</div><ul><li>D3 秦淮夜色 → D4 钟山一日 → D5 文博历史 → D6 铭记+民国 → D7 休闲购物 → D8 返程</li><li>免费预约三件套：南博/中山陵/纪念馆，出发前7天抢票</li><li>钟山联票¥100（明孝陵+美龄宫+音乐台+灵谷寺）</li><li>住宿：前2晚新街口，后3晚夫子庙/老门东</li></ul><div class="cost">💰 南京段人均约 ¥1,100-1,800（不含高铁）</div>',
-'nj-3':'<div class="cd"><i style="background:#ef4444"></i>8/25 周二 · 转场+秦淮夜色</div><ul><li>12:00-13:00 抵达南京，新街口/夫子庙入住放行李</li><li>13:00-14:00 鸭血粉丝汤+牛肉锅贴午餐</li><li>14:30-17:00 老门东逛吃（金陵墙/先锋书店）</li><li>18:00-19:30 步行15分钟到夫子庙，南京大牌档晚餐</li><li>19:30-21:00 秦淮河夜游船（¥120/人，文德桥C位）</li></ul><div class="cost">💰 人均约 ¥260-330（含游船）</div>',
-'nj-4':'<div class="cd"><i style="background:#f59e0b"></i>8/26 周三 · 钟山风景区一日</div><ul><li>07:30 芳婆糕团店早餐（乌饭团+糖芋苗）</li><li>08:30-10:30 中山陵（提前7天预约！）</li><li>10:30-11:30 音乐台喂白鸽（¥10）</li><li>11:30-12:30 灵谷寺松风阁素面</li><li>13:00-15:00 明孝陵石象路（3号门进，先看鹿）</li><li>15:00-16:00 美龄宫（¥30）</li><li>16:00-17:00 梧桐大道情侣剪影</li><li>19:00-20:30 1912街区小酌</li></ul><div class="cost">💰 联票¥100/人+观光车+餐饮，人均约 ¥180-230</div>',
-'nj-5':'<div class="cd"><i style="background:#10b981"></i>8/27 周四 · 文博历史+湘菜</div><ul><li>08:00 李记清真馆牛肉锅贴</li><li>09:00-12:30 南京博物院（提前7天18:00抢票！）</li><li>12:30-13:30 科巷午餐（草鸡蛋蛋糕/老米记酒酿）</li><li>14:00-16:30 总统府（¥35，提前2天预约）</li><li>16:30-17:30 六朝博物馆（可选 ¥30）</li><li>17:30-18:30 长江路漫步</li><li>19:00-20:30 湘当笨湘菜晚餐</li><li>20:30-21:30 德基广场网红洗手间打卡</li></ul><div class="cost">💰 人均约 ¥120-170（门票+餐饮）</div>',
-'nj-6':'<div class="cd"><i style="background:#3b82f6"></i>8/28 周五 · 铭记历史+民国风情</div><ul><li>08:30-11:30 遇难同胞纪念馆（提前7天7:00抢票，禁拍照）</li><li>13:00-15:00 颐和路民国公馆拍照</li><li>15:30-17:30 鸡鸣寺求姻缘（¥10）</li><li>17:30-19:00 玄武湖+“别有洞天”日落</li><li>19:00-20:30 金哥私房菜晚餐</li><li>20:30-21:30 熙南里灯火天街夜游</li></ul><div class="cost">💰 人均约 ¥80-120</div>',
-'nj-7':'<div class="cd"><i style="background:#8b5cf6"></i>8/29 周六 · 休闲购物+告别</div><ul><li>方案A：08:30-12:00 红山动物园（¥70）</li><li>方案B：10:00-15:00 牛首山（¥160+观光车20）</li><li>13:30-15:30 科巷采购伴手礼（韩复兴盐水鸭）</li><li>16:00-18:00 新街口商圈购物</li><li>18:00-19:30 告别湘菜（湘当笨/费大厨）</li><li>19:30-21:00 三牌楼夜市/明瓦廊夜宵</li></ul><div class="cost">💰 方案A人均约 ¥150-200；方案B约 ¥280-320</div>',
-'nj-8':'<div class="cd"><i style="background:#ec4899"></i>8/30 周日 · 自由活动+返程</div><ul><li>08:00 芳婆糕团店最后早餐</li><li>09:00-11:00 可选：台城城墙俯瞰玄武湖 / 老门东补拍 / 自然醒</li><li>11:00-12:00 午餐</li><li>12:00-13:00 退房</li><li>13:00-16:00 最后采购（盐水鸭/糕团/雨花茶）</li><li>16:30 地铁前往南京南站</li><li>17:47 G7613 高铁回宁波（¥208，20:21到）</li></ul><div class="cost">💰 人均约 ¥300（含高铁）</div>',
-'sz-0':'<div class="cd">📋 苏州2天总览</div><ul><li>D1 拙政园+平江路夜游 → D2 耦园+留园+寒山寺+山塘街夜景</li><li>苏博周一闭馆，8/24不安排</li><li>拙政园必须提前预约，现场不售票</li><li>住宿：平江路/观前街周边</li></ul><div class="cost">💰 苏州段人均约 ¥700-900（含住宿2晚+门票+餐饮）</div>',
-'sz-1':'<div class="cd"><i style="background:#06b6d4"></i>8/23 周日 · 抵达+拙政园+平江路</div><ul><li>10:26 宁波站 G7508 出发（¥150-180）</li><li>13:05 到苏州站，地铁入住平江路/观前街</li><li>14:30-17:00 拙政园（提前预约！¥80）</li><li>17:00-17:30 苏州博物馆外观（周一闭馆明天不去）</li><li>17:30-19:30 平江路夜游逛吃（哑巴生煎/糖粥）</li><li>19:30-20:30 茶馆评弹（人均30-50）</li></ul><div class="cost">💰 人均约 ¥300-350</div>',
-'sz-2':'<div class="cd"><i style="background:#f97316"></i>8/24 周一 · 耦园+留园+寒山寺+山塘街</div><ul><li>07:30 哑巴生煎早餐</li><li>08:00-10:00 耦园（¥25，爱情园林，吾爱亭）</li><li>10:30-12:00 留园（¥55，冠云峰）</li><li>12:00-13:00 同得兴枫镇大肉面</li><li>13:30-15:00 寒山寺（¥20）</li><li>15:30-16:30 枫桥景区</li><li>17:30-20:30 山塘街夜景（通贵桥/新民桥）</li></ul><div class="cost">💰 人均约 ¥220-280</div>'
-};
-</script>
-<script>
-'use strict';
-var NS='http://www.w3.org/2000/svg';
-var ALLPOIS=POIS.concat(POIS_SZ);
-var CATICON={spot:'🏛️',food:'🍜',photo:'📸',avoid:'⚠️',hotel:'🛏️',transit:'🚄'};
-var state={city:'sz',day:1};
-var CITY={
-  nj:{lat0:31.90,lat1:32.18,lng0:118.55,lng1:118.95},
-  sz:{lat0:31.26,lat1:31.42,lng0:120.53,lng1:120.75}
-};
-var VB_H={nj:826,sz:852}, VB_W=1000;
-function proj(city,lat,lng){
-  var b=CITY[city],pad=0.055;
-  var px=(lng-b.lng0)/(b.lng1-b.lng0);
-  var py=(b.lat1-lat)/(b.lat1-b.lat0);
-  return {x:(pad+(1-2*pad)*px)*VB_W, y:(pad+(1-2*pad)*py)*VB_H[city]};
-}
-function P(city,arr){return arr.map(function(a){return proj(city,a[0],a[1]);});}
-function smoothD(pts,close){
-  var i,n=pts.length,d='M'+pts[0].x.toFixed(1)+','+pts[0].y.toFixed(1);
-  for(i=0;i<n-1;i++){
-    var p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(n-1,i+2)];
-    var c1={x:p1.x+(p2.x-p0.x)/6,y:p1.y+(p2.y-p0.y)/6};
-    var c2={x:p2.x-(p3.x-p1.x)/6,y:p2.y-(p3.y-p1.y)/6};
-    d+=' C'+c1.x.toFixed(1)+','+c1.y.toFixed(1)+' '+c2.x.toFixed(1)+','+c2.y.toFixed(1)+' '+p2.x.toFixed(1)+','+p2.y.toFixed(1);
-  }
-  if(close){d+=' Z';}
-  return d;
-}
-function findPOI(city,nm){for(var i=0;i<ALLPOIS.length;i++){var p=ALLPOIS[i];if(p.city===city&&p.name===nm)return p;}return null;}
+  var suppressMapScroll = false;
 
-/* ---- 手绘底图：水/山/河/路/地名/装饰 ---- */
-var WATER={
-  nj:[
-    {pts:[[32.170,118.55],[32.152,118.62],[32.143,118.70],[32.152,118.78],[32.142,118.86],[32.165,118.95]],fill:'#BFE0F5'},       // 长江
-    {pts:[[32.064,118.772],[32.071,118.765],[32.082,118.768],[32.089,118.778],[32.087,118.792],[32.077,118.800],[32.066,118.796],[32.061,118.786]],fill:'#CDE8F8'}, // 玄武湖
-    {pts:[[31.962,118.60],[31.988,118.66],[32.006,118.72],[32.020,118.785],[32.029,118.845],[32.023,118.905]],fill:'none'}        // 秦淮河(河道)
-  ],
-  sz:[
-    {pts:[[31.405,120.543],[31.345,120.552],[31.300,120.547],[31.262,120.562]],fill:'none'},    // 京杭大运河
-    {pts:[[31.331,120.614],[31.337,120.630],[31.331,120.644],[31.316,120.650],[31.299,120.642],[31.294,120.627],[31.299,120.611],[31.312,120.604]],fill:'#CDE8F8'}, // 护城河
-    {pts:[[31.303,120.674],[31.311,120.666],[31.323,120.668],[31.332,120.678],[31.332,120.693],[31.323,120.702],[31.309,120.701],[31.301,120.692]],fill:'#CDE8F8'}, // 金鸡湖
-    {pts:[[31.278,120.700],[31.286,120.694],[31.296,120.697],[31.299,120.706],[31.292,120.714],[31.280,120.713]],fill:'#CDE8F8'}  // 独墅湖
-  ]
-};
-var RIVERS={
-  nj:[
-    {pts:[[32.170,118.55],[32.152,118.62],[32.143,118.70],[32.152,118.78],[32.142,118.86],[32.165,118.95]],w:44,color:'#BFE0F5'},
-    {pts:[[31.962,118.60],[31.988,118.66],[32.006,118.72],[32.020,118.785],[32.029,118.845],[32.023,118.905]],w:11,color:'#A8D4EC'}
-  ],
-  sz:[
-    {pts:[[31.405,120.543],[31.345,120.552],[31.300,120.547],[31.262,120.562]],w:20,color:'#BFE0F5'},
-    {pts:[[31.328,120.552],[31.322,120.565],[31.315,120.582],[31.309,120.604]],w:10,color:'#A8D4EC'}
-  ]
-};
-var HILLS={
-  nj:[
-    {pts:[[32.044,118.842],[32.056,118.856],[32.072,118.864],[32.085,118.852],[32.080,118.836],[32.062,118.825]],fill:'#E9F3DE'},
-    {pts:[[31.995,118.785],[32.005,118.778],[32.014,118.782],[32.015,118.792],[32.006,118.798]],fill:'#EEF5E6'}
-  ],
-  sz:[
-    {pts:[[31.326,120.548],[31.333,120.553],[31.337,120.562],[31.330,120.568],[31.322,120.563]],fill:'#E9F3DE'}
-  ]
-};
-var ROADS={
-  nj:[[[31.998,118.72],[32.042,118.86]],[[32.005,118.70],[32.075,118.82]],[[32.04,118.62],[32.038,118.95]]],
-  sz:[[[31.330,120.57],[31.312,120.68]],[[31.29,120.59],[31.336,120.63]]]
-};
-var LABELS={
-  nj:[
-    {t:'长 江',at:[32.145,118.71],cls:'water-t'},
-    {t:'玄武湖',at:[32.077,118.775],cls:'water-t'},
-    {t:'秦淮河',at:[32.012,118.685],cls:'water-t'},
-    {t:'钟山',at:[32.088,118.848],cls:'hill-t'},
-    {t:'南京城区',at:[32.033,118.783]},
-    {t:'新街口',at:[32.0415,118.768]}
-  ],
-  sz:[
-    {t:'京杭大运河',at:[31.330,120.549],cls:'water-t'},
-    {t:'金鸡湖',at:[31.326,120.690],cls:'water-t'},
-    {t:'独墅湖',at:[31.285,120.706],cls:'water-t'},
-    {t:'苏州古城',at:[31.313,120.622]},
-    {t:'虎丘',at:[31.338,120.560],cls:'hill-t'}
-  ]
-};
-function deco(c){
-  var h='';
-  if(c==='nj'){
-    h+='<circle cx="936" cy="76" r="26" fill="#FFCD42"/>';
-    for(var a=0;a<360;a+=30){var r1=34,r2=47,x=936+Math.cos(a*Math.PI/180)*r1,y=76+Math.sin(a*Math.PI/180)*r1;
-      h+='<line x1="'+x.toFixed(1)+'" y1="'+y.toFixed(1)+'" x2="'+(936+Math.cos(a*Math.PI/180)*r2).toFixed(1)+'" y2="'+(76+Math.sin(a*Math.PI/180)*r2).toFixed(1)+'" stroke="#FFCD42" stroke-width="4" stroke-linecap="round"/>';}
-    h+='<g fill="#fff"><circle cx="120" cy="92" r="11"/><circle cx="132" cy="86" r="14"/><circle cx="146" cy="90" r="12"/><circle cx="136" cy="98" r="9"/></g>';
-    h+='<g fill="#fff"><circle cx="760" cy="60" r="10"/><circle cx="772" cy="55" r="13"/><circle cx="784" cy="58" r="11"/><circle cx="776" cy="65" r="8"/></g>';
-    h+='<g stroke="#8a9bb0" stroke-width="3" stroke-linecap="round" fill="none"><path d="M842,232 q6,-8 12,0"/><path d="M862,242 q6,-8 12,0"/><path d="M882,232 q6,-8 12,0"/></g>';
-    h+='<g transform="translate(807,286)"><path d="M-10,0 L10,0 L0,-24 Z" fill="#A56B3F"/><rect x="-7" y="0" width="14" height="16" fill="#A56B3F"/><line x1="-15" y1="-8" x2="15" y2="-8" stroke="#A56B3F" stroke-width="3"/></g>';
-    h+='<g transform="translate(592,138)"><path d="M-18,14 L-18,-8 L-2,14 Z" fill="#FF9678"/><path d="M-14,14 L12,-18 L12,14 Z" fill="#fff" stroke="#FF9678" stroke-width="2"/><line x1="-18" y1="14" x2="12" y2="14" stroke="#FF9678" stroke-width="4"/></g>';
-  }else{
-    h+='<circle cx="936" cy="66" r="24" fill="#FFCD42"/>';
-    for(var a2=0;a2<360;a2+=30){var r1b=32,r2b=44,xb=936+Math.cos(a2*Math.PI/180)*r1b,yb=66+Math.sin(a2*Math.PI/180)*r1b;
-      h+='<line x1="'+xb.toFixed(1)+'" y1="'+yb.toFixed(1)+'" x2="'+(936+Math.cos(a2*Math.PI/180)*r2b).toFixed(1)+'" y2="'+(66+Math.sin(a2*Math.PI/180)*r2b).toFixed(1)+'" stroke="#FFCD42" stroke-width="4" stroke-linecap="round"/>';}
-    h+='<g fill="#fff"><circle cx="130" cy="80" r="10"/><circle cx="142" cy="74" r="13"/><circle cx="156" cy="78" r="11"/><circle cx="146" cy="86" r="8"/></g>';
-    h+='<g stroke="#8a9bb0" stroke-width="3" stroke-linecap="round" fill="none"><path d="M800,140 q6,-8 12,0"/><path d="M820,150 q6,-8 12,0"/><path d="M840,140 q6,-8 12,0"/></g>';
-  }
-  return h;
-}
-function buildBase(){
-  var c=state.city,h='';
-  WATER[c].forEach(function(f){h+='<path class="water" d="'+smoothD(P(c,f.pts),true)+'" fill="'+f.fill+'" stroke="#8FBEDC" stroke-width="2"/>';});
-  HILLS[c].forEach(function(f){h+='<path class="hill" d="'+smoothD(P(c,f.pts),true)+'" fill="'+f.fill+'" stroke="#CFE3C0" stroke-width="2.5"/>';});
-  RIVERS[c].forEach(function(r){h+='<path class="river" d="'+smoothD(P(c,r.pts),false)+'" fill="none" stroke="'+r.color+'" stroke-width="'+r.w+'" stroke-linecap="round" stroke-linejoin="round"/>';});
-  ROADS[c].forEach(function(r){h+='<path d="'+smoothD(P(c,r),false)+'" fill="none" stroke="#E9DCC0" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 14"/>';});
-  LABELS[c].forEach(function(l){var pt=proj(c,l.at[0],l.at[1]);h+='<text class="geo '+(l.cls||'')+'" x="'+pt.x.toFixed(1)+'" y="'+pt.y.toFixed(1)+'">'+l.t+'</text>';});
-  if(c==='nj'){
-    var wall=[[32.034,118.758],[32.052,118.778],[32.058,118.798],[32.048,118.818],[32.028,118.820],[32.012,118.802],[32.014,118.776],[32.024,118.758]];
-    h+='<path class="wall" d="'+smoothD(P(c,wall),true)+'" fill="none" stroke="#D9C9A8" stroke-width="2.5" stroke-dasharray="6 6"/>';
-  }
-  h+=deco(c);
-  return h;
-}
+  document.querySelectorAll('.stp').forEach(function(g){
+    var svgns = 'http://www.w3.org/2000/svg';
+    var hit = document.createElementNS(svgns, 'circle');
+    hit.setAttribute('r', '52');
+    hit.setAttribute('fill', 'transparent');
+    g.insertBefore(hit, g.firstChild);
 
-/* ---- 元素引用 ---- */
-var svgEl=document.getElementById('svgMap'), worldG=document.getElementById('world');
-var mapEl=document.getElementById('map'), popEl=document.getElementById('popup');
-var view={s:1,tx:0,ty:0},ADJ={};
+    var pulse = document.createElementNS(svgns, 'circle');
+    pulse.setAttribute('class', 'pulse');
+    pulse.setAttribute('r', '24');
+    pulse.setAttribute('fill', 'none');
+    pulse.setAttribute('stroke', '#FF7A6E');
+    pulse.setAttribute('stroke-width', '3');
+    g.appendChild(pulse);
 
-function computeAdj(){
-  ADJ={};
-  var c=state.city,d=state.day;
-  var list=ALLPOIS.filter(function(p){return p.city===c&&d!==null&&p.day&&p.day.indexOf(d)>=0;});
-  if(list.length<2){list.forEach(function(p){var q=proj(c,p.lat,p.lng);ADJ[p.id]={x:q.x,y:q.y};});return;}
-  var pts=list.map(function(p){var q=proj(c,p.lat,p.lng);return {id:p.id,x:q.x,y:q.y,dx:0,dy:0};});
-  var minDist=38;
-  for(var it=0;it<5;it++){
-    for(var i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++){
-      var a=pts[i],b=pts[j],dx=b.x-a.x,dy=b.y-a.y,dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<minDist&&dist>0.5){
-        var push=(minDist-dist)*0.35,ux=dx/dist,uy=dy/dist;
-        a.dx-=ux*push;a.dy-=uy*push;b.dx+=ux*push;b.dy+=uy*push;
-      }
-    }
-  }
-  pts.forEach(function(q){
-    var m=Math.hypot(q.dx,q.dy);
-    if(m>30){q.dx*=30/m;q.dy*=30/m;}
-    ADJ[q.id]={x:q.x+q.dx,y:q.y+q.dy};
-  });
-  // 动线展开：沿线拉开相邻站点，保证编号清晰可读
-  var route=d!==null?ROUTES[c+'-'+d]:null;
-  if(route){
-    var ids=[];
-    route.forEach(function(nm){var p=findPOI(c,nm);if(p&&ADJ[p.id])ids.push(p.id);});
-    for(var pass=0;pass<5;pass++){
-      var moved=false;
-      for(var k=0;k<ids.length-1;k++){
-        var a=ADJ[ids[k]],b=ADJ[ids[k+1]];
-        if(!a||!b)continue;
-        var dx=b.x-a.x,dy=b.y-a.y,dd=Math.hypot(dx,dy);
-        if(dd<48&&dd>0.5){
-          var ux=dx/dd,uy=dy/dd,push=48-dd;
-          b.x+=ux*push;b.y+=uy*push;moved=true;
+    var sx = 0, sy = 0;
+    g.addEventListener('pointerdown', function(e){ sx = e.clientX; sy = e.clientY; });
+    g.addEventListener('click', function(e){
+      if (Math.hypot(e.clientX - sx, e.clientY - sy) > 8) return;
+      var d = g.getAttribute('data-day');
+      if (d && d !== '0') {
+        var el = document.getElementById('day-' + d);
+        if (el) {
+          suppressMapScroll = true;
+          if (!el.open) el.open = true;
+          el.classList.remove('flash');
+          void el.offsetWidth;
+          el.classList.add('flash');
+          el.scrollIntoView({behavior:'smooth', block:'start'});
+          setTimeout(function(){ suppressMapScroll = false; }, 700);
         }
       }
-      if(!moved)break;
+    });
+  });
+
+  // ===== 实景地图（高德风格）=====
+  var spots = [
+    {name:'宁波站（出发）', lat:29.8648, lng:121.5427, dayNum:1, emoji:'🚄', desc:'G7508 10:26 → 苏州', opt:false},
+    {name:'苏州站', lat:31.3322, lng:120.6084, dayNum:1, emoji:'🚉', desc:'13:05 到达，地铁到古城', opt:false},
+    {name:'拙政园', lat:31.3237, lng:120.6254, dayNum:1, emoji:'🏯', desc:'¥80 · 提前1-7天预约 · 荷塘+北寺塔借景', opt:false},
+    {name:'苏州博物馆', lat:31.3244, lng:120.6223, dayNum:1, emoji:'🏛️', desc:'外观打卡（周一闭馆未安排入馆）', opt:false},
+    {name:'平江路', lat:31.3166, lng:120.6321, dayNum:1, emoji:'🏮', desc:'免费 · 夜游+评弹+汉服', opt:false},
+    {name:'耦园', lat:31.3198, lng:120.6402, dayNum:2, emoji:'💕', desc:'¥25 · 爱情主题园林·吾爱亭', opt:false},
+    {name:'留园', lat:31.3166, lng:120.5741, dayNum:2, emoji:'🏯', desc:'¥55 · 冠云峰', opt:false},
+    {name:'寒山寺', lat:31.3104, lng:120.5624, dayNum:2, emoji:'🛕', desc:'¥20 · 姑苏城外寒山寺', opt:false},
+    {name:'枫桥', lat:31.3109, lng:120.5654, dayNum:2, emoji:'🌉', desc:'免费 · 运河古桥全景', opt:false},
+    {name:'七里山塘', lat:31.3135, lng:120.6034, dayNum:2, emoji:'🏮', desc:'免费 · 19:00亮灯夜景', opt:false},
+    {name:'狮子林', lat:31.3232, lng:120.6293, dayNum:2, emoji:'🪨', desc:'¥40 · 可选加站', opt:true},
+    {name:'西园寺', lat:31.3103, lng:120.5793, dayNum:2, emoji:'🐱', desc:'¥5 · 撸猫+素面（可选）', opt:true},
+    {name:'金鸡湖·苏州之眼', lat:31.3173, lng:120.7117, dayNum:2, emoji:'🎡', desc:'摩天轮看日落（可选）', opt:true},
+    {name:'虎丘', lat:31.3358, lng:120.5743, dayNum:3, emoji:'🏔️', desc:'¥70 · 虎丘塔倒影9:00前最佳', opt:false},
+    {name:'老门东', lat:32.0117, lng:118.7956, dayNum:3, emoji:'🏘️', desc:'免费 · 先锋书店+小吃', opt:false},
+    {name:'夫子庙·秦淮河', lat:32.0216, lng:118.7879, dayNum:3, emoji:'🚢', desc:'夜游¥120 · 文德桥全景', opt:false},
+    {name:'中山陵', lat:32.0600, lng:118.8491, dayNum:4, emoji:'🏛️', desc:'免费需预约 · 392级台阶', opt:false},
+    {name:'音乐台', lat:32.0610, lng:118.8463, dayNum:4, emoji:'🕊️', desc:'¥10 · 喂白鸽', opt:false},
+    {name:'明孝陵', lat:32.0566, lng:118.8355, dayNum:4, emoji:'🏯', desc:'¥70/联票100 · 石象路神道', opt:false},
+    {name:'美龄宫', lat:32.0543, lng:118.8478, dayNum:4, emoji:'💎', desc:'¥30 · 远东第一别墅', opt:false},
+    {name:'梧桐大道', lat:32.0538, lng:118.8391, dayNum:4, emoji:'🌳', desc:'免费 · 日落剪影', opt:false},
+    {name:'灵谷寺', lat:32.0520, lng:118.8664, dayNum:4, emoji:'🏛️', desc:'联票含 · 素面（可选）', opt:true},
+    {name:'南京博物院', lat:32.0426, lng:118.8246, dayNum:5, emoji:'🏛️', desc:'免费需预约 · 金兽+民国馆', opt:false},
+    {name:'总统府', lat:32.0485, lng:118.7962, dayNum:5, emoji:'🏫', desc:'¥35 · 600年风云史', opt:false},
+    {name:'六朝博物馆', lat:32.0483, lng:118.7981, dayNum:5, emoji:'📜', desc:'¥30 · 可选', opt:true},
+    {name:'科巷', lat:32.0397, lng:118.7936, dayNum:5, emoji:'🍜', desc:'美食街+特产', opt:false},
+    {name:'新街口', lat:32.0420, lng:118.7786, dayNum:5, emoji:'🛍️', desc:'商圈+德基洗手间打卡', opt:false},
+    {name:'德基广场', lat:32.0429, lng:118.7823, dayNum:5, emoji:'✨', desc:'千万级洗手间', opt:false},
+    {name:'遇难同胞纪念馆', lat:32.0330, lng:118.7428, dayNum:6, emoji:'🕊️', desc:'免费需预约 · 心怀敬畏', opt:false},
+    {name:'颐和路', lat:32.0656, lng:118.7754, dayNum:6, emoji:'🌳', desc:'免费 · 民国公馆+梧桐', opt:false},
+    {name:'鸡鸣寺', lat:32.0595, lng:118.8005, dayNum:6, emoji:'🛕', desc:'¥10 · 求姻缘', opt:false},
+    {name:'玄武湖', lat:32.0719, lng:118.7986, dayNum:6, emoji:'🌊', desc:'免费 · 别有洞天日落', opt:false},
+    {name:'熙南里', lat:32.0284, lng:118.7763, dayNum:6, emoji:'🏮', desc:'免费 · 灯火天街夜游', opt:false},
+    {name:'中山码头', lat:32.0866, lng:118.7408, dayNum:6, emoji:'🚢', desc:'1元轮渡长江日落（可选）', opt:true},
+    {name:'红山动物园', lat:32.0985, lng:118.8061, dayNum:7, emoji:'🐼', desc:'¥70 · 一早入园', opt:false},
+    {name:'牛首山', lat:31.9181, lng:118.7174, dayNum:7, emoji:'🏔️', desc:'¥160 · 佛顶宫（可选）', opt:true},
+    {name:'南京南站', lat:31.9701, lng:118.7968, dayNum:8, emoji:'🚄', desc:'G7613 17:47 → 宁波', opt:false}
+  ];
+  var dayGroups = {};
+  var allMarkers = [];
+  spots.forEach(function(s){
+    var badge = s.opt ? '可选' : 'D' + s.dayNum;
+    var icon = L.divIcon({className:'rmk-wrap', html:'<div class="rmk"><span class="rp">'+badge+'</span><span class="re">'+s.emoji+'</span></div>', iconSize:[40,42], iconAnchor:[20,40]});
+    var m = L.marker([s.lat, s.lng], {icon:icon});
+    m._spot = s;
+    m.bindPopup('<b>'+s.name+'</b><br>Day '+s.dayNum+(s.opt?'（可选加站）':'')+'<br>'+s.desc);
+    allMarkers.push(m);
+    (dayGroups[s.dayNum] = dayGroups[s.dayNum] || L.layerGroup()).addLayer(m);
+  });
+
+  var gaode = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}', {subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图'});
+  var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap'});
+  var realMap = L.map('realmap', {layers:[gaode], scrollWheelZoom:true}).setView([31.9,119.4], 8);
+  L.control.layers({'高德地图':gaode, 'OpenStreetMap':osm}, null, {collapsed:false}).addTo(realMap);
+
+  L.polyline([[29.865,121.543],[31.332,120.608],[31.315,120.632],[32.02,118.787],[32.043,118.782],[32.098,118.807]], {color:'#FF7A6E', weight:4, dashArray:'8 8', opacity:.85}).addTo(realMap);
+  L.layerGroup(allMarkers).addTo(realMap);
+
+  function setDayFilter(day){
+    var ds = String(day);
+    if (selLabel) realMap.removeLayer(selLabel);
+    selLabel = null;
+    document.querySelectorAll('#dayfilters button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-day') === ds); });
+    allMarkers.forEach(function(m){
+      if (ds === '0' || String(m._spot.dayNum) === ds) { m.addTo(realMap); } else { realMap.removeLayer(m); }
+    });
+    if (ds === '0') {
+      realMap.fitBounds([[29.85,118.7],[32.12,121.56]]);
+    } else {
+      var g = dayGroups[parseInt(ds,10)];
+      if (g) realMap.fitBounds(g.getBounds().pad(0.35));
     }
   }
-  // 二次微调：拉开仍过近的任意两点
-  var keys=Object.keys(ADJ);
-  for(var it=0;it<3;it++){
-    for(var i2=0;i2<keys.length;i2++)for(var j2=i2+1;j2<keys.length;j2++){
-      var a2=ADJ[keys[i2]],b2=ADJ[keys[j2]];
-      var dx2=b2.x-a2.x,dy2=b2.y-a2.y,d2=Math.hypot(dx2,dy2);
-      if(d2<42&&d2>0.5){
-        var push2=(42-d2)*0.4,ux2=dx2/d2,uy2=dy2/d2;
-        a2.x-=ux2*push2;a2.y-=uy2*push2;b2.x+=ux2*push2;b2.y+=uy2*push2;
+  document.querySelectorAll('#dayfilters button').forEach(function(b){
+    b.addEventListener('click', function(){ setDayFilter(b.getAttribute('data-day')); });
+  });
+
+  // 卡片地点 → 地图定位（精细定位）
+  var selLabel = null;
+  function selectSpot(hit, mm){
+    var sec = document.getElementById('realmap-sec');
+    if (sec) sec.scrollIntoView({behavior:'smooth', block:'start'});
+    setTimeout(function(){
+      if (selLabel) realMap.removeLayer(selLabel);
+      selLabel = L.marker([hit.lat, hit.lng], {icon: L.divIcon({className:'rmk-label', html:'📍 ' + hit.name, iconSize:[150,28], iconAnchor:[75,-10]})}).addTo(realMap);
+      document.querySelectorAll('.rmk-wrap.sel').forEach(function(e){ e.classList.remove('sel'); });
+      var elm = mm.getElement();
+      if (elm) elm.classList.add('sel');
+      realMap.flyTo([hit.lat, hit.lng], 17, {duration:1.2});
+      setTimeout(function(){ mm.openPopup(); }, 1500);
+    }, 300);
+  }
+  var aliases = {'秦淮河夜游':'夫子庙·秦淮河', '山塘街':'七里山塘', '苏博':'苏州博物馆'};
+  function matchSpot(txt){
+    for (var i = 0; i < spots.length; i++) { if (txt.indexOf(spots[i].name) !== -1) return spots[i]; }
+    for (var k in aliases) {
+      if (txt.indexOf(k) !== -1) {
+        for (var j = 0; j < spots.length; j++) { if (spots[j].name === aliases[k]) return spots[j]; }
       }
     }
+    return null;
   }
-  list.forEach(function(p){
-    var q=proj(c,p.lat,p.lng),A=ADJ[p.id];
-    var dx3=A.x-q.x,dy3=A.y-q.y,m3=Math.hypot(dx3,dy3);
-    if(m3>45){A.x=q.x+dx3*45/m3;A.y=q.y+dy3*45/m3;}
+  document.querySelectorAll('table.timeline td.l').forEach(function(td){
+    td.classList.add('clk');
+    if (matchSpot(td.textContent || '')) td.innerHTML += ' <span class="gotomap">📍 地图定位</span>';
+    td.addEventListener('click', function(){
+      var hit = matchSpot(td.textContent || '');
+      if (!hit) return;
+      setDayFilter(hit.dayNum);
+      var mm = null;
+      allMarkers.forEach(function(mk){ if (mk._spot === hit) mm = mk; });
+      if (mm) selectSpot(hit, mm);
+    });
   });
-}
 
-/* ---- 图层 ---- */
-function drawMarkers(){
-  var old=svgEl.querySelector('.layer-mk'); if(old)old.remove();
-  var c=state.city,d=state.day,layer=document.createElementNS(NS,'g');
-  layer.setAttribute('class','layer-mk');
-  var route=(d!==null)?ROUTES[c+'-'+d]:null, idx={};
-  if(route)route.forEach(function(nm,i){var p=findPOI(c,nm);if(p)idx[p.id]=i+1;});
-  var list=ALLPOIS.filter(function(p){
-    if(p.city!==c)return false;
-    if(d===null)return p.cat==='spot'||p.cat==='photo'||p.cat==='food';
-    return p.day&&p.day.indexOf(d)>=0;
-  });
-  var centers=[];
-  list.forEach(function(p){
-    var pt=ADJ[p.id]||proj(c,p.lat,p.lng);
-    if(d!==null&&idx[p.id]===undefined&&p.cat!=='hotel'&&p.cat!=='transit')return;
-    centers.push({p:p,x:pt.x,y:pt.y});
-  });
-  var placed=[];
-  centers.forEach(function(it){
-    var p=it.p,pt={x:it.x,y:it.y},g=document.createElementNS(NS,'g');
-    g.setAttribute('class','mk cat-'+p.cat+(d===null?' overview':' day'));
-    g.setAttribute('transform','translate('+pt.x.toFixed(1)+','+pt.y.toFixed(1)+')');
-    var num=idx[p.id],inner;
-    if(d===null){
-      inner='<circle class="dot" r="6.5" fill="'+CATS[p.cat].color+'" stroke="#fff" stroke-width="1.5"/>';
-    }else if(num){
-      inner='<circle class="dot" r="12" fill="'+CATS[p.cat].color+'" stroke="#fff" stroke-width="3"/>';
-      inner+='<circle class="num" r="8" fill="#fff" opacity="0.96"/><text class="numt" y="1">'+num+'</text>';
-      g.setAttribute('class','mk cat-'+p.cat+' day stop');
-    }else{
-      inner='<circle class="dot" r="8.5" fill="'+CATS[p.cat].color+'" stroke="#fff" stroke-width="2" opacity="0.9"/>';
-      g.setAttribute('class','mk cat-'+p.cat+' day ctx');
-    }
-    if(d!==null){
-      var nw=p.name.length*13.5+8,nh=18;
-      var anchors=[{dx:20,dy:5,an:'start'},{dx:-20,dy:5,an:'end'},{dx:0,dy:-22,an:'middle'},{dx:0,dy:26,an:'middle'}];
-      var pick=anchors[0];
-      for(var ai=0;ai<anchors.length;ai++){
-        var a=anchors[ai],lx=pt.x+a.dx,ly=pt.y+a.dy;
-        var box={x:(a.an==='end'?lx-nw:a.an==='middle'?lx-nw/2:lx),y:ly-nh/2,w:nw,h:nh};
-        var ok=true;
-        for(var bi=0;bi<placed.length;bi++){var q=placed[bi];if(box.x<q.x+q.w&&box.x+box.w>q.x&&box.y<q.y+q.h&&box.y+box.h>q.y){ok=false;break;}}
-        if(ok){
-          for(var ci=0;ci<centers.length;ci++){
-            var o=centers[ci];
-            if(o.p.id===p.id)continue;
-            if(o.x>box.x-9&&o.x<box.x+box.w+9&&o.y>box.y-9&&o.y<box.y+box.h+9){ok=false;break;}
-          }
-        }
-        if(ok){pick=a;placed.push(box);break;}
+
+  // 卡片 → 地图高亮联动
+  var activeDay = null;
+  function highlightDay(day){
+    document.querySelectorAll('.stp').forEach(function(g){
+      g.classList.toggle('active', g.getAttribute('data-day') === day);
+    });
+  }
+  function scrollToMap(day){
+    var target = document.getElementById('realmap-sec');
+    if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  document.querySelectorAll('details.day').forEach(function(d){
+    var day = d.id.replace('day-', '');
+    d.querySelector('summary').addEventListener('click', function(){
+      highlightDay(day);
+      activeDay = day;
+      if (!suppressMapScroll) {
+        scrollToMap(day);
+        setDayFilter(day);
       }
-      inner+='<text class="lbl" x="'+pick.dx+'" y="'+pick.dy+'" text-anchor="'+pick.an+'">'+p.name+'</text>';
-    }else{
-      inner+='<title>'+p.name+'</title>';
-    }
-    g.innerHTML=inner;
-    g.addEventListener('click',function(ev){ev.stopPropagation();openPopup(p);});
-    layer.appendChild(g);
+    });
   });
-  svgEl.appendChild(layer);
-}
-function drawRoute(){
-  var old=svgEl.querySelector('.layer-rt'); if(old)old.remove();
-  var c=state.city,d=state.day; if(d===null)return;
-  var r=ROUTES[c+'-'+d]; if(!r)return;
-  var layer=document.createElementNS(NS,'g'); layer.setAttribute('class','layer-rt');
-  var pts=[];
-  r.forEach(function(nm){var p=findPOI(c,nm);if(p)pts.push(ADJ[p.id]||proj(c,p.lat,p.lng));});
-  if(pts.length<2)return;
-  var col=DAYMETA[c][d].color,ds='M'+pts[0].x.toFixed(1)+','+pts[0].y.toFixed(1);
-  for(var i=1;i<pts.length;i++)ds+=' L'+pts[i].x.toFixed(1)+','+pts[i].y.toFixed(1);
-  var casing=document.createElementNS(NS,'path');
-  casing.setAttribute('d',ds);casing.setAttribute('stroke','#fff');casing.setAttribute('stroke-width','9');
-  casing.setAttribute('fill','none');casing.setAttribute('stroke-linecap','round');casing.setAttribute('opacity','.85');
-  layer.appendChild(casing);
-  var path=document.createElementNS(NS,'path');
-  path.setAttribute('d',ds);path.setAttribute('class','rt-line');path.setAttribute('stroke',col);
-  layer.appendChild(path);
-  var s0=document.createElementNS(NS,'circle');
-  s0.setAttribute('cx',pts[0].x);s0.setAttribute('cy',pts[0].y);s0.setAttribute('r','11');
-  s0.setAttribute('fill','#2E9E5B');s0.setAttribute('stroke','#fff');s0.setAttribute('stroke-width','3');
-  layer.appendChild(s0);
-  var s0t=document.createElementNS(NS,'text');
-  s0t.setAttribute('x',pts[0].x+17);s0t.setAttribute('y',pts[0].y+4);
-  s0t.setAttribute('class','rt-start');s0t.textContent='起点';
-  layer.appendChild(s0t);
-  var e=pts[pts.length-1];
-  var fl=document.createElementNS(NS,'text');
-  fl.setAttribute('x',e.x);fl.setAttribute('y',e.y-16);fl.setAttribute('text-anchor','middle');
-  fl.setAttribute('font-size','17');fl.textContent='🚩';
-  layer.appendChild(fl);
-  svgEl.appendChild(layer);
-}
-
-/* ---- 视野 ---- */
-function applyView(noSmooth){worldG.classList.toggle('nosmooth',!!noSmooth);worldG.setAttribute('transform','translate('+view.tx.toFixed(1)+','+view.ty.toFixed(1)+') scale('+view.s+')');}
-function fitView(){
-  var c=state.city,d=state.day,pts=[];
-  if(d!==null){var r=ROUTES[c+'-'+d];if(r)r.forEach(function(nm){var p=findPOI(c,nm);if(p)pts.push(ADJ[p.id]||proj(c,p.lat,p.lng));});}
-  if(pts.length<2){view={s:1,tx:0,ty:0};applyView();return;}
-  var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
-  pts.forEach(function(p){x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y);});
-  var cw=Math.max(260,mapEl.clientWidth),ch=Math.max(260,mapEl.clientHeight);
-  var kx=cw/VB_W,ky=ch/VB_H[c];
-  var s=Math.min(cw*0.86/Math.max((x1-x0)*kx,1),ch*0.86/Math.max((y1-y0)*ky,1));
-  s=Math.max(0.6,Math.min(4.5,s));
-  view={s:s,tx:VB_W/2-s*(x0+x1)/2,ty:VB_H[c]/2-s*(y0+y1)/2};
-  applyView();
-}
-function toViewBox(ev){
-  var ctm=svgEl.getScreenCTM(),pt=svgEl.createSVGPoint();
-  pt.x=ev.clientX;pt.y=ev.clientY;
-  var q=pt.matrixTransform(ctm.inverse());
-  return {x:q.x,y:q.y};
-}
-
-/* ---- 侧栏 ---- */
-function renderTabs(){
-  var box=document.getElementById('dayTabs'),days=(state.city==='nj'?NJDAYS:SZDAYS),h='';
-  h+='<button class="day-tab overview'+(state.day===null?' on':'')+'" data-day="all">📋 总览</button>';
-  days.forEach(function(n){
-    var m=DAYMETA[state.city][n],short=m.label.split(' ')[1]||('D'+n);
-    h+='<button class="day-tab'+(state.day===n?' on':'')+'" data-day="'+n+'"><i class="dd" style="background:'+m.color+'"></i>D'+n+' '+short+'</button>';
-  });
-  box.innerHTML=h;
-  Array.prototype.forEach.call(box.querySelectorAll('.day-tab'),function(b){
-    b.onclick=function(){var v=b.getAttribute('data-day');setDay(v==='all'?null:+v);};
-  });
-}
-function showCard(){
-  var key=state.city+'-'+(state.day===null?0:state.day),html=DAYCARDS[key],card=document.getElementById('card');
-  if(html){card.style.display='block';card.innerHTML=html;}else{card.style.display='none';}
-}
-function updateSidebar(){
-  var c=state.city,d=state.day;
-  var title=document.getElementById('dayTitle'),sub=document.getElementById('daySub'),rl=document.getElementById('routeList');
-  if(d===null){
-    title.innerHTML='📋 '+(c==='nj'?'南京':'苏州')+' 总览';
-    sub.textContent='点击上方日期，看每天的具体安排';
-    rl.innerHTML='';
-    return;
-  }
-  var m=DAYMETA[c][d];
-  title.innerHTML='<i class="dd" style="background:'+m.color+'"></i>'+m.label.replace(' ',' · ');
-  sub.textContent='当天动线 '+ROUTES[c+'-'+d].length+' 站 · 点地图圆点看详情';
-  var h='';
-  ROUTES[c+'-'+d].forEach(function(nm,i){
-    var p=findPOI(c,nm);
-    var ic=p?CATICON[p.cat]:'📍';
-    var tip=p&&p.rows?p.rows[0][1].slice(0,26):'';
-    if(tip&&tip.length>=26)tip+='…';
-    h+='<div class="route-item"><span class="n" style="background:'+m.color+'">'+(i+1)+'</span><span class="ic">'+ic+'</span><div class="t"><b>'+nm+'</b>'+(tip?'<span>'+tip+'</span>':'')+'</div></div>';
-  });
-  rl.innerHTML=h;
-}
-function setDay(n){
-  state.day=n;closePopup();
-  computeAdj();
-  renderTabs();drawMarkers();drawRoute();fitView();showCard();updateSidebar();
-}
-function setCity(c){
-  if(state.city===c)return;
-  state.city=c;state.day=(c==='nj'?3:1);closePopup();
-  computeAdj();
-  document.getElementById('city-nj').classList.toggle('on',c==='nj');
-  document.getElementById('city-sz').classList.toggle('on',c==='sz');
-  svgEl.setAttribute('viewBox','0 0 '+VB_W+' '+VB_H[c]);
-  worldG.innerHTML=buildBase();
-  computeAdj();
-  renderTabs();drawMarkers();drawRoute();fitView();showCard();updateSidebar();
-}
-
-/* ---- 弹窗 ---- */
-function openPopup(p){
-  var h='<button class="x" onclick="closePopup()">✕</button>';
-  h+='<div class="pop-t"><span class="tag" style="background:'+CATS[p.cat].color+'">'+CATICON[p.cat]+' '+CATS[p.cat].label+'</span>'+p.name+'</div>';
-  (p.rows||[]).forEach(function(r){h+='<div class="row"><b>'+r[0]+'</b><span>'+r[1]+'</span></div>';});
-  if(p.note)h+='<div class="note">💡 '+p.note+'</div>';
-  if(p.warn)h+='<div class="warn">⚠️ '+p.warn+'</div>';
-  popEl.innerHTML=h;popEl.classList.add('show');
-  var old=svgEl.querySelector('.mk.hl');if(old)old.classList.remove('hl');
-  var all=svgEl.querySelectorAll('.mk');Array.prototype.forEach.call(all,function(g){if(g.textContent.indexOf(p.name)>=0)g.classList.add('hl');});
-}
-function closePopup(){popEl.classList.remove('show');popEl.innerHTML='';var old=svgEl.querySelector('.mk.hl');if(old)old.classList.remove('hl');}
-
-/* ---- 交互 ---- */
-var dragging=false,q0=null;
-mapEl.addEventListener('pointerdown',function(ev){dragging=true;q0=toViewBox(ev);mapEl.classList.add('dragging');mapEl.setPointerCapture(ev.pointerId);});
-mapEl.addEventListener('pointermove',function(ev){if(!dragging)return;var q=toViewBox(ev);view.tx+=q.x-q0.x;view.ty+=q.y-q0.y;q0=q;applyView(true);});
-window.addEventListener('pointerup',function(){dragging=false;mapEl.classList.remove('dragging');});
-mapEl.addEventListener('wheel',function(ev){ev.preventDefault();
-  var q=toViewBox(ev),k=ev.deltaY<0?1.14:0.88,s=Math.max(0.6,Math.min(5,view.s*k));
-  var px=(q.x-view.tx)/view.s,py=(q.y-view.ty)/view.s;
-  view.s=s;view.tx=q.x-s*px;view.ty=q.y-s*py;applyView(true);
-},{passive:false});
-document.getElementById('zin').onclick=function(){var q={x:VB_W/2,y:VB_H[state.city]/2},s=Math.min(3.2,view.s*1.3);var px=(q.x-view.tx)/view.s,py=(q.y-view.ty)/view.s;view.s=s;view.tx=q.x-s*px;view.ty=q.y-s*py;applyView();};
-document.getElementById('zout').onclick=function(){var q={x:VB_W/2,y:VB_H[state.city]/2},s=Math.max(0.5,view.s/1.3);var px=(q.x-view.tx)/view.s,py=(q.y-view.ty)/view.s;view.s=s;view.tx=q.x-s*px;view.ty=q.y-s*py;applyView();};
-document.getElementById('fitBtn').onclick=function(){fitView();};
-document.getElementById('city-sz').onclick=function(){setCity('sz');};
-document.getElementById('city-nj').onclick=function(){setCity('nj');};
-window.addEventListener('resize',function(){applyView();});
-
-/* ---- 图例 ---- */
-(function(){
-  var names={spot:'景点',food:'美食',photo:'拍照机位',hotel:'住宿',transit:'交通',avoid:'避雷'},keys=['spot','food','photo','hotel','transit','avoid'],h='';
-  keys.forEach(function(k){h+='<span class="it"><span class="d" style="background:'+CATS[k].color+'"></span>'+names[k]+'</span>';});
-  h+='<span class="it"><span class="d" style="background:#2E9E5B"></span>起点</span><span class="it">🚩终点</span>';
-  document.getElementById('legendBox').innerHTML=h;
-})();
-
-/* ---- 启动 ---- */
-svgEl.setAttribute('viewBox','0 0 '+VB_W+' '+VB_H.sz);
-worldG.innerHTML=buildBase();
-computeAdj();
-renderTabs();drawMarkers();drawRoute();fitView();showCard();updateSidebar();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
