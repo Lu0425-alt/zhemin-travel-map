@@ -621,8 +621,8 @@
     (dayGroups[s.dayNum] = dayGroups[s.dayNum] || L.layerGroup()).addLayer(m);
   });
 
-  var gaode = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}', {subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图'});
-  var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap'});
+  var gaode = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=2&style=7&x={x}&y={y}&z={z}', {subdomains:['1','2','3','4'], maxZoom:19, maxNativeZoom:18, attribution:'© 高德地图'});
+  var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, detectRetina:true, attribution:'© OpenStreetMap'});
   var realMap = L.map('realmap', {layers:[gaode], scrollWheelZoom:true}).setView([31.9,119.4], 8);
   L.control.layers({'高德地图':gaode, 'OpenStreetMap':osm}, null, {collapsed:false}).addTo(realMap);
 
@@ -659,7 +659,7 @@
       document.querySelectorAll('.rmk-wrap.sel').forEach(function(e){ e.classList.remove('sel'); });
       var elm = mm.getElement();
       if (elm) elm.classList.add('sel');
-      realMap.flyTo([hit.lat, hit.lng], 17, {duration:1.2});
+      realMap.flyTo([hit.lat, hit.lng], 18, {duration:1.2});
       setTimeout(function(){ mm.openPopup(); }, 1500);
     }, 300);
   }
@@ -676,13 +676,19 @@
   document.querySelectorAll('table.timeline td.l').forEach(function(td){
     td.classList.add('clk');
     if (matchSpot(td.textContent || '')) td.innerHTML += ' <span class="gotomap">📍 地图定位</span>';
-    td.addEventListener('click', function(){
+    td.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
       var hit = matchSpot(td.textContent || '');
       if (!hit) return;
       setDayFilter(hit.dayNum);
       var mm = null;
       allMarkers.forEach(function(mk){ if (mk._spot === hit) mm = mk; });
-      if (mm) selectSpot(hit, mm);
+      if (!mm) return;
+      var sec = document.getElementById('realmap-sec');
+      if (sec) sec.scrollIntoView({behavior:'smooth', block:'start'});
+      setTimeout(function(){ realMap.invalidateSize(); }, 500);
+      setTimeout(function(){ selectSpot(hit, mm); }, 700);
     });
   });
 
